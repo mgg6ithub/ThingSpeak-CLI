@@ -1,9 +1,13 @@
-import requests
+from src.thingspeak import ThingSpeak
+from src.utils import Utils
+
 from colorama import Fore, Back, Style, init
+import requests
 import signal
 import sys
 import time
 import os
+
 
 # login_url = "https://thingspeak.com/login?skipSSOCheck=true"
 #
@@ -20,7 +24,6 @@ def signal_handler(signum, frame):
 
 
 def main():
-
     # URL inicial de inicio de sesión en ThingSpeak
     login_url = 'https://thingspeak.com/login?skipSSOCheck=true'
 
@@ -38,14 +41,21 @@ def main():
 def menu():
     signal.signal(signal.SIGINT, signal_handler)
     init()
+    u = Utils()
 
     while True:
-        os.system("clear")
+        u.clear()
         print("1. Iniciar Sesion con CREDENCIALES.\n")
         print("2. Iniciar sesion con APY KEY.\n")
         print("CTRL + C para salir en cualquier momento.\n")
 
-        input(Fore.GREEN + "ts:> " + Fore.WHITE)
+        i = input(Fore.GREEN + "ts:> " + Fore.WHITE)
+
+        if i == "2":
+            apy_key = input("Introduce tu apy key: ")
+
+            ts = ThingSpeak(apy_key)
+            ts.checkUserApyKey()
 
 
 if __name__ == '__main__':
