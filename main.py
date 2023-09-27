@@ -8,18 +8,14 @@ import sys
 import time
 import os
 
-
-# login_url = "https://thingspeak.com/login?skipSSOCheck=true"
-#
-# email = "yaxeb66148@nickolis.com"
-# password = "Cuenta2314"
+# Instancia global para utilizar la clase utils
+u = Utils()
 
 
 def signal_handler(signum, frame):
     os.system("clear")
-    print()
     print(Fore.RED + "Saliendo de TS")
-    time.sleep(1)
+    u.wait_animation(1)
     sys.exit(1)
 
 
@@ -41,7 +37,6 @@ def main():
 def menu():
     signal.signal(signal.SIGINT, signal_handler)
     init()
-    u = Utils()
 
     while True:
         u.clear()
@@ -56,16 +51,14 @@ def menu():
 
             ts = ThingSpeak(apy_key)
             c = ts.checkUserApyKey()
-            try:
-                u.hide_cursor()
-                u.wait(2)
-                u.show_cursor()
-                u.clear()
-            finally:
-                u.cleanup()
-
+            u.wait_animation(1)
             if c:
-                print("MENU DEL CANAL")
+                channels_json = ts.get_user_channels()
+                if not channels_json.json():
+                    print("No hay canales")
+                else:
+                    print("Hay canales")
+                    print(channels_json.json())
 
                 i = input()
 

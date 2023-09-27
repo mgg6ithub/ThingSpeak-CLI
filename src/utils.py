@@ -3,15 +3,12 @@ import requests
 import sys
 import platform
 import time
-import curses
 
 
 class Utils:
 
     def __init__(self):
         self.clear_command = "cls" if platform.system() == "Windows" else "clear"
-        curses.initscr()
-    # Default checkings
 
     # Clear screen method
     def clear(self):
@@ -27,18 +24,21 @@ class Utils:
             print("Has interrumpido la espera del programa.\n")
 
     def hide_cursor(self):
-        curses.curs_set(0)
+        print("\x1b[?25l") # hidden
 
     def show_cursor(self):
-        curses.curs_set(1)
+        print("\x1b[?25h") # shown
 
-    def cleanup(self):
-        curses.endwin()
+    # Wait and hide cursor
+    def wait_animation(self, time_to_wait):
+        self.hide_cursor()
+        self.wait(time_to_wait)
+        self.show_cursor()
 
     # Method to make http requests
-    def make_request(**self):
+    def make_request(self, **kwargs):
         try:
-            r = requests.request(**self)
+            r = requests.request(**kwargs)
         except requests.exceptions.HTTPError as err:
             # print(f"MEDOTOD: {tipo}")
             print("Informacion del error -> " + err.args[0])

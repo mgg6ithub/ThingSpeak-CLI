@@ -17,8 +17,8 @@ class ThingSpeak:
     def checkUserApyKey(self):
         self.u.clear()
         init()
-        req = Utils.make_request(method="GET",
-                                 url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
+        req = self.u.make_request(method="GET",
+                                  url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
 
         if req.status_code == 200:
             print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
@@ -27,3 +27,7 @@ class ThingSpeak:
             print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
             return False
 
+    def get_user_channels(self):
+        req = self.u.make_request(method="GET",
+                                  url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
+        return req
