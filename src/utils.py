@@ -2,38 +2,43 @@ import os
 import requests
 import sys
 import platform
+import time
+import curses
 
 
 class Utils:
 
     def __init__(self):
-        self.clear_command = self.check_os_type()
-
+        self.clear_command = "cls" if platform.system() == "Windows" else "clear"
+        curses.initscr()
     # Default checkings
-    # Os detection
-    def check_os_type(self):
-        os_type = platform.system()
 
-        if os_type == "Windows":
-            return "cls"
-        elif os_type == "Linux":
-            return "clear"
-        elif os_type == "Darwin":
-            return "clear"
-        else:
-            pass
-
-    # Program Utils
+    # Clear screen method
     def clear(self):
         return_code = os.system(self.clear_command)
         if return_code != 0:
             print("Error al limpiar la pantalla")
 
-    # METODO PARA REALIZAR PETICIONES HTTP
-    @staticmethod
-    def realizar_peticion(**kwargs):
+    # Wait method
+    def wait(self, t):
         try:
-            r = requests.request(**kwargs)
+            time.sleep(t)
+        except KeyboardInterrupt:
+            print("Has interrumpido la espera del programa.\n")
+
+    def hide_cursor(self):
+        curses.curs_set(0)
+
+    def show_cursor(self):
+        curses.curs_set(1)
+
+    def cleanup(self):
+        curses.endwin()
+
+    # Method to make http requests
+    def make_request(**self):
+        try:
+            r = requests.request(**self)
         except requests.exceptions.HTTPError as err:
             # print(f"MEDOTOD: {tipo}")
             print("Informacion del error -> " + err.args[0])

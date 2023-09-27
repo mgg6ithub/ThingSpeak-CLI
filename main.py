@@ -55,7 +55,19 @@ def menu():
             apy_key = input("Introduce tu apy key: ")
 
             ts = ThingSpeak(apy_key)
-            ts.checkUserApyKey()
+            c = ts.checkUserApyKey()
+            try:
+                u.hide_cursor()
+                u.wait(2)
+                u.show_cursor()
+                u.clear()
+            finally:
+                u.cleanup()
+
+            if c:
+                print("MENU DEL CANAL")
+
+                i = input()
 
 
 if __name__ == '__main__':
