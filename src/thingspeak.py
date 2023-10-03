@@ -14,6 +14,7 @@ class ThingSpeak:
     def __str__(self):
         print(f"Tu apy key es: {self.user_apy_key}")
 
+    # Metodo para comprobar la clave ingresada
     def checkUserApyKey(self):
         self.u.clear()
         init()
@@ -27,7 +28,12 @@ class ThingSpeak:
             print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
             return False
 
-    def get_user_channels(self):
+    # Metodo para obtener una lista con los canales existentes
+    def get_channels_list(self):
         req = self.u.make_request(method="GET",
                                   url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
-        return req
+        return len(req.json()), req
+
+    # Metodo para obtener los objetos json de los canales a partir de la lista
+    def get_channels_json(self, list):
+        pass

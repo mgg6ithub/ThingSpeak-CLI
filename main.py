@@ -53,12 +53,14 @@ def menu():
             c = ts.checkUserApyKey()
             u.wait_animation(1)
             if c:
-                channels_json = ts.get_user_channels()
-                if not channels_json.json():
+                length, channels_list = ts.get_channels_list()
+                if length == 0:
                     print("No hay canales")
                 else:
                     print("Hay canales")
-                    print(channels_json.json())
+                    print(f"Hay {length} canales")
+                    for c in range(0, length):
+                        print(channels_list.json()[c])
 
                 i = input()
 

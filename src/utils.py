@@ -3,6 +3,7 @@ import requests
 import sys
 import platform
 import time
+import json
 
 
 class Utils:
@@ -34,6 +35,10 @@ class Utils:
         self.hide_cursor()
         self.wait(time_to_wait)
         self.show_cursor()
+
+    # Metodo para convertir una lista a un objeto json
+    def list_to_json(self, lista):
+        return json.dumps(lista)
 
     # Method to make http requests
     def make_request(self, **kwargs):
