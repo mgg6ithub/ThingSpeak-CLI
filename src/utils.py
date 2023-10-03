@@ -4,6 +4,7 @@ import sys
 import platform
 import time
 import json
+from colorama import Fore
 
 
 class Utils:
@@ -35,6 +36,17 @@ class Utils:
         self.hide_cursor()
         self.wait(time_to_wait)
         self.show_cursor()
+
+    # Endless ThingSpeak -CLI terminal
+    def endless_terminal(self, message, *options):
+
+        self.clear()
+        print(message + "\n")
+
+        while True:
+            i = input(Fore.GREEN + "ts> " + Fore.WHITE)
+            if i in options:
+                return i
 
     # Metodo para convertir una lista a un objeto json
     def list_to_json(self, lista):

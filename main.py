@@ -19,6 +19,19 @@ def signal_handler(signum, frame):
     sys.exit(1)
 
 
+# Metodo para comprobar la clave ingresada
+def checkUserApyKey(apy_key):
+    u.clear()
+    init()
+    req = u.make_request(method="GET",
+                         url=f"https://api.thingspeak.com/channels.json?api_key={apy_key}")
+
+    if req.status_code == 200:
+        return True
+    elif req.status_code == 401:
+        return False
+
+
 def main():
     # URL inicial de inicio de sesión en ThingSpeak
     login_url = 'https://thingspeak.com/login?skipSSOCheck=true'
@@ -49,20 +62,14 @@ def menu():
         if i == "2":
             apy_key = input("Introduce tu apy key: ")
 
-            ts = ThingSpeak(apy_key)
-            c = ts.checkUserApyKey()
-            u.wait_animation(1)
-            if c:
-                length, channels_list = ts.get_channels_list()
-                if length == 0:
-                    print("No hay canales")
-                else:
-                    print("Hay canales")
-                    print(f"Hay {length} canales")
-                    for c in range(0, length):
-                        print(channels_list.json()[c])
-
-                i = input()
+            if checkUserApyKey(apy_key):
+                print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
+                ts = ThingSpeak(apy_key, u)
+                u.wait_animation(1)
+                ts.main_menu()
+            else:
+                print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
+                u.wait_animation(1)
 
 
 if __name__ == '__main__':
