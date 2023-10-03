@@ -66,7 +66,9 @@ def menu():
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
                 ts = ThingSpeak(apy_key, u)
                 u.wait_animation(1)
-                ts.main_menu()
+                # ts.list_public_channels()
+                # ts.main_menu()
+                ts.read_settings()
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 u.wait_animation(1)
