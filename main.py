@@ -50,7 +50,8 @@ def login():
             if checkUserApyKey(api_key):
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
                 u.wait_animation(1)
-                menu_principal(api_key)
+                # ts = ThingSpeak(api_key, u)
+                # menu_principal(api_key)
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 u.wait_animation(1)
@@ -69,20 +70,21 @@ def menu_principal(api_key):
 
     if option == "1":
 
-        r = ts.get_public_channels()
+        ts.print_public_channels()
 
-        if len(r.json()) != 0:
-            for c in r.json()['channels']:
-                u.printFormatedTable(["Id", "Name", "Description",
-                                      "Latitude", "Longitude","Created at", "Elevation",]
-                                     , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
-                                         c['elevation'], c['created_at']]])
+        # if len(r.json()) != 0:
+        #     for c in r.json()['channels']:
+        #         u.printFormatedTable(["Id", "Name", "Description",
+        #                               "Latitude", "Longitude", "Created at", "Elevation",]
+        #                              , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
+        #                                  c['elevation'], c['created_at']]])
     elif option == "2":
-        pass
+        ts.print_private_channels()
     else:
-        r = ts.get_channels_list()
+        ts.print_all_channels()
 
-        print(r.json())
+    i = input()
+    menu_principal(api_key)
         # if len(r.json()) != 0:
         #     for c in r.json()['channels']:
         #         u.printFormatedTable(["Id", "Name", "Description",
@@ -148,3 +150,6 @@ if __name__ == '__main__':
     # main()
     # login()
     menu_principal("0WX1WIYR7G3QMKUR")
+    # ts = ThingSpeak("0WX1WIYR7G3QMKUR", u)
+
+    # print(ts.__str__())
