@@ -5,6 +5,7 @@ import platform
 import time
 import json
 from colorama import Fore
+from tabulate import tabulate
 
 
 class Utils:
@@ -17,6 +18,19 @@ class Utils:
         return_code = os.system(self.clear_command)
         if return_code != 0:
             print("Error al limpiar la pantalla")
+
+    def printRequest(self, req):
+        print(req.status_code)
+        print(req.json())
+        print(req.text)
+
+    def printFormatedTable(self, tableHeaders, tableData):
+
+        # formated_data = []
+        # for row in tableData:
+        #     formated_data.append([row.get("id", ""), row.get("name", "")])
+
+        print(tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="grid"))
 
     # Wait method
     def wait(self, t):

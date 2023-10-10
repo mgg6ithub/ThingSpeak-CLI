@@ -58,6 +58,7 @@ def menu():
         print("CTRL + C para salir en cualquier momento.\n")
 
         i = input(Fore.GREEN + "ts:> " + Fore.WHITE)
+        u.clear()
 
         if i == "2":
             apy_key = input("Introduce tu apy key: ")
@@ -66,12 +67,13 @@ def menu():
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
                 ts = ThingSpeak(apy_key, u)
                 u.wait_animation(1)
-                # ts.list_public_channels()
-                # ts.main_menu()
-                ts.read_settings()
+
+                ts.main_menu()
+                # ts.read_settings()
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 u.wait_animation(1)
+        i = input()
 
 
 if __name__ == '__main__':

@@ -1,8 +1,3 @@
-import requests
-from colorama import Fore, init
-import time
-
-
 class ThingSpeak:
 
     def __init__(self, user_apy_key, u):
@@ -27,7 +22,8 @@ class ThingSpeak:
             else:
                 print(f"Hay {length} canales")
                 for c in range(0, length):
-                    print(channels_list.json()[c])
+                    # print(channels_list.json()[c])
+                    self.u.printFormatedTable(["ID", "NAME"], [[channels_list.json()[c]["id"], channels_list.json()[c]["name"]]])
 
                 i = input()
                 self.main_menu()
@@ -44,21 +40,12 @@ class ThingSpeak:
     def list_public_channels(self):
         req = self.u.make_request(method="GET",
                                   url="https://api.thingspeak.com/users/mwa0000031155118/channels.json")
-
-        print(req.status_code)
-        print(req.json())
-        print(req.text)
-        i = input()
+        return req
 
     # Method to get all the channel settings
     def get_channel_settings(self, id):
         req = self.u.make_request(method="GET",
                                   url=f"https://api.thingspeak.com/channels/{id}.json?api_key={self.user_apy_key}")
-
-        print(req.status_code)
-        print(req.json())
-        print(req.text)
-        i = input()
 
     # Metodo para obtener los objetos json de los canales a partir de la lista
     def get_channels_json(self, list):
