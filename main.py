@@ -1,15 +1,14 @@
 from src.thingspeak import ThingSpeak
 from src.utils import Utils
 
-from colorama import Fore, Back, Style, init
-import requests
+from colorama import Fore, init
 import signal
 import sys
-import time
 import os
 
 # Instancia global para utilizar la clase utils
 u = Utils()
+init()
 
 
 def signal_handler(signum, frame):
@@ -17,6 +16,9 @@ def signal_handler(signum, frame):
     print(Fore.RED + "Saliendo de TS")
     u.wait_animation(1)
     sys.exit(1)
+
+
+signal.signal(signal.SIGINT, signal_handler)
 
 
 # Metodo para comprobar la clave ingresada
@@ -32,50 +34,85 @@ def checkUserApyKey(apy_key):
         return False
 
 
-def main():
-    # URL inicial de inicio de sesión en ThingSpeak
-    login_url = 'https://thingspeak.com/login?skipSSOCheck=true'
-
-    # Tus credenciales de inicio de sesión
-    email = 'tu_correo_electronico'
-    password = 'tu_contraseña'
-
-    # Realiza la primera solicitud GET a la página de inicio de sesión
-    session = requests.session()
-    response = session.get(login_url)
-
-    print(response.text)
-
-
-def menu():
-    signal.signal(signal.SIGINT, signal_handler)
-    init()
-
+def login():
     while True:
         u.clear()
-        print("1. Iniciar Sesion con CREDENCIALES.\n")
-        print("2. Iniciar sesion con APY KEY.\n")
-        print("CTRL + C para salir en cualquier momento.\n")
+        str_banner = "1. Iniciar Sesion con CREDENCIALES.\n\n" \
+                     "2. Iniciar sesion con APY KEY.\n\n" \
+                     "CTRL + C para salir en cualquier momento.\n"
 
-        i = input(Fore.GREEN + "ts:> " + Fore.WHITE)
+        option = u.endless_terminal(str_banner, "1", "2")
         u.clear()
 
-        if i == "2":
-            apy_key = input("Introduce tu apy key: ")
+        if option == "2":
+            api_key = input("Introduce tu apy key: ")
 
-            if checkUserApyKey(apy_key):
+            if checkUserApyKey(api_key):
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
-                ts = ThingSpeak(apy_key, u)
                 u.wait_animation(1)
-
-                ts.main_menu()
-                # ts.read_settings()
+                menu_principal(api_key)
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 u.wait_animation(1)
         i = input()
 
 
+# Menu de la cuenta ThigSpeak
+def menu_principal(api_key):
+    ts = ThingSpeak(api_key, u)
+
+    print(f"En total hay {ts.get_channels_length()} canales\n\n")
+
+    req = ts.get_channels_list()
+
+    u.printRequest(req)
+
+    print(f"En total hay {ts.get_public_channels_length()} canales publicos\n\n")
+
+    req1 = ts.get_public_channels()
+
+    u.printRequest(req1)
+
+    private_channels = 0
+
+    for c in range(0, ts.get_channels_length()):
+        if not req.json()[c]["public_flag"]:
+            private_channels += 1
+
+    print(f"En total hay {str(private_channels)} canales privados")
+
+    # ts.get_channel_settings("2289652")
+
+    # print()
+    #
+    # length, req1 = ts.get_channels_list()
+    # print(req1.json()[0])
+    #
+    # # ts.main_menu()
+    # # ts.read_settings()
+    #
+    # str_banner = "Menu principal\n" \
+    #              "1 -- Ver canales\n" \
+    #              "2 -- Salir al menu principal\n"
+    #
+    # i = self.u.endless_terminal(str, "1", "2")
+    #
+    # if i == "1":
+    #     length, channels_list = self.get_channels_list()
+    #     if length == 0:
+    #         print("No hay canales")
+    #     else:
+    #         print(f"Hay {length} canales")
+    #         for c in range(0, length):
+    #             self.u.printFormatedTable(["ID", "NAME"],
+    #                                       [[channels_list.json()[c]["id"], channels_list.json()[c]["name"]]])
+    #
+    #         i = input()
+    #         self.main_menu()
+    # elif i == "2":
+    #     return
+
+
 if __name__ == '__main__':
     # main()
-    menu()
+    login()

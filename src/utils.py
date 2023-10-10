@@ -22,7 +22,6 @@ class Utils:
     def printRequest(self, req):
         print(req.status_code)
         print(req.json())
-        print(req.text)
 
     def printFormatedTable(self, tableHeaders, tableData):
 

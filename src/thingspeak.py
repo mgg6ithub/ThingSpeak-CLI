@@ -7,46 +7,37 @@ class ThingSpeak:
     def __str__(self):
         print(f"Tu apy key es: {self.user_apy_key}")
 
-    # Menu de la cuenta ThigSpeak
-    def main_menu(self):
-        str = "Menu principal\n" \
-              "1 -- Ver canales\n" \
-              "2 -- Salir al menu principal\n"
-
-        i = self.u.endless_terminal(str, "1", "2")
-
-        if i == "1":
-            length, channels_list = self.get_channels_list()
-            if length == 0:
-                print("No hay canales")
-            else:
-                print(f"Hay {length} canales")
-                for c in range(0, length):
-                    # print(channels_list.json()[c])
-                    self.u.printFormatedTable(["ID", "NAME"], [[channels_list.json()[c]["id"], channels_list.json()[c]["name"]]])
-
-                i = input()
-                self.main_menu()
-        elif i == "2":
-            return
+    # Method to know how many private and public channels there are
+    def get_channels_length(self):
+        return len(self.get_channels_list().json())
 
     # Method to get the list of all existing channels
     def get_channels_list(self):
         req = self.u.make_request(method="GET",
                                   url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
-        return len(req.json()), req
+        return req
+
+    # Method to know how many public channels are there
+    def get_public_channels_length(self):
+        return len(self.get_public_channels().json())
 
     # Method to get the list of all public channels
-    def list_public_channels(self):
+    def get_public_channels(self):
         req = self.u.make_request(method="GET",
                                   url="https://api.thingspeak.com/users/mwa0000031155118/channels.json")
         return req
 
-    # Method to get all the channel settings
-    def get_channel_settings(self, id):
-        req = self.u.make_request(method="GET",
-                                  url=f"https://api.thingspeak.com/channels/{id}.json?api_key={self.user_apy_key}")
+    # Method to obtain all private channels
+    def get_private_channels(self):
+        pass
 
     # Metodo para obtener los objetos json de los canales a partir de la lista
     def get_channels_json(self, list):
         pass
+
+    # Metodo que obtiene los datos de un canal pasandole su id
+    def get_channel_settings(self, id):
+        req = self.u.make_request(method="GET",
+                                  url=f"https://api.thingspeak.com/channels/{id}.json?api_key={self.user_apy_key}")
+
+        return req
