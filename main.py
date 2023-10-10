@@ -59,27 +59,58 @@ def login():
 
 # Menu de la cuenta ThigSpeak
 def menu_principal(api_key):
+    str_banner = "1 -- Ver canales públicos.\n\n" \
+                 "2 -- Ver canales privados.\n\n" \
+                 "3 -- Ver todos los canales\n\n"
+
+    option = u.endless_terminal(str_banner, "1", "2", "3")
+
     ts = ThingSpeak(api_key, u)
 
-    print(f"En total hay {ts.get_channels_length()} canales\n\n")
+    if option == "1":
 
-    req = ts.get_channels_list()
+        r = ts.get_public_channels()
 
-    u.printRequest(req)
+        if len(r.json()) != 0:
+            for c in r.json()['channels']:
+                u.printFormatedTable(["Id", "Name", "Description",
+                                      "Latitude", "Longitude","Created at", "Elevation",]
+                                     , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
+                                         c['elevation'], c['created_at']]])
+    elif option == "2":
+        pass
+    else:
+        r = ts.get_channels_list()
 
-    print(f"En total hay {ts.get_public_channels_length()} canales publicos\n\n")
+        print(r.json())
+        # if len(r.json()) != 0:
+        #     for c in r.json()['channels']:
+        #         u.printFormatedTable(["Id", "Name", "Description",
+        #                               "Latitude", "Longitude","Created at", "Elevation",]
+        #                              , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
+        #                                  c['elevation'], c['created_at']]])
 
-    req1 = ts.get_public_channels()
 
-    u.printRequest(req1)
-
-    private_channels = 0
-
-    for c in range(0, ts.get_channels_length()):
-        if not req.json()[c]["public_flag"]:
-            private_channels += 1
-
-    print(f"En total hay {str(private_channels)} canales privados")
+    #
+    # print(f"En total hay {ts.get_channels_length()} canales\n\n")
+    #
+    # req = ts.get_channels_list()
+    #
+    # u.printRequest(req)
+    #
+    # print(f"En total hay {ts.get_public_channels_length()} canales publicos\n\n")
+    #
+    # req1 = ts.get_public_channels()
+    #
+    # u.printRequest(req1)
+    #
+    # private_channels = 0
+    #
+    # for c in range(0, ts.get_channels_length()):
+    #     if not req.json()[c]["public_flag"]:
+    #         private_channels += 1
+    #
+    # print(f"En total hay {str(private_channels)} canales privados")
 
     # ts.get_channel_settings("2289652")
 
@@ -115,4 +146,5 @@ def menu_principal(api_key):
 
 if __name__ == '__main__':
     # main()
-    login()
+    # login()
+    menu_principal("0WX1WIYR7G3QMKUR")

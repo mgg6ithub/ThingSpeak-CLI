@@ -24,11 +24,6 @@ class Utils:
         print(req.json())
 
     def printFormatedTable(self, tableHeaders, tableData):
-
-        # formated_data = []
-        # for row in tableData:
-        #     formated_data.append([row.get("id", ""), row.get("name", "")])
-
         print(tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="grid"))
 
     # Wait method
