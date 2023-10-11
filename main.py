@@ -69,28 +69,14 @@ def menu_principal(api_key):
     ts = ThingSpeak(api_key, u)
 
     if option == "1":
-
-        ts.print_public_channels()
-
-        # if len(r.json()) != 0:
-        #     for c in r.json()['channels']:
-        #         u.printFormatedTable(["Id", "Name", "Description",
-        #                               "Latitude", "Longitude", "Created at", "Elevation",]
-        #                              , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
-        #                                  c['elevation'], c['created_at']]])
+        ts.print_channel_index(ts.public_channels)
     elif option == "2":
-        ts.print_private_channels()
+        ts.print_channels(ts.private_channels)
     else:
-        ts.print_all_channels()
+        ts.print_channels(ts.all_channels)
 
-    i = input()
+    u.endless_terminal("Press any key to go back", c="c")
     menu_principal(api_key)
-        # if len(r.json()) != 0:
-        #     for c in r.json()['channels']:
-        #         u.printFormatedTable(["Id", "Name", "Description",
-        #                               "Latitude", "Longitude","Created at", "Elevation",]
-        #                              , [[c['id'], c['name'], c['description'], c['latitude'], c['longitude'],
-        #                                  c['elevation'], c['created_at']]])
 
 
     #

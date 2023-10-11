@@ -24,7 +24,8 @@ class Utils:
         print(req.json())
 
     def printFormatedTable(self, tableHeaders, tableData):
-        print(tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="grid"))
+        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="presto")
+        print(table)
 
     # Wait method
     def wait(self, t):
@@ -46,9 +47,10 @@ class Utils:
         self.show_cursor()
 
     # Endless ThingSpeak -CLI terminal
-    def endless_terminal(self, message, *options):
+    def endless_terminal(self, message, *options, c=None):
 
-        self.clear()
+        if c is None:
+            self.clear()
         print(message + "\n")
 
         while True:

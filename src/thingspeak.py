@@ -21,6 +21,12 @@ class ThingSpeak:
     def __str__(self):
         return str(self.all_channels)
 
+    # Method to print the overall information of a channel
+    # Name  Id
+    def print_channel_index(self, channels):
+        for c in channels:
+            print(str(c['id']) + "\t" + c['name'] + "\n")
+
     # Method to obtain all the channels from the logged account
     def get_channel_info(self):
         req = self.get_channels_list()
@@ -38,34 +44,16 @@ class ThingSpeak:
         else:
             return None
 
-    # Method to print all the public channels
-    def print_public_channels(self):
-        for c in self.public_channels:
-            self.u.printFormatedTable(["Id", "Name", "Description", "Latitude", "Longitude",
-                                       "Created at", "Elevation"], [[c['id'], c['name'],
-                                                                     c['description'], c['latitude'], c['longitude'],
-                                                                     c['elevation'], c['created_at']]])
+    # Method to print channels
+    def print_channels(self, channels_to_print):
 
-    # Method to print all the private channels
-    # En el bucle c imprime rl diccionario del canal asi:
-    # {'id': 2299146, 'name': 'Canal1', 'description': 'Esta es la descripcion del canal 1',
-    # 'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
-    # 'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
-    # 'license_id': 0, 'github_url': None, 'tags': [],
-    # 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT', 'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
-    def print_private_channels(self):
-        for c in self.private_channels:
-            self.u.printFormatedTable(["Id", "Name", "Description", "Latitude", "Longitude",
-                                       "Created at", "Elevation"], [[c['id'], c['name'],
+        cont = 1
+        for c in channels_to_print:
+            self.u.printFormatedTable([" Nº ", "Id", "Name", "Description", "Latitude", "Longitude",
+                                       "Created at", "Elevation"], [[f" CANAL {cont} ", c['id'], c['name'],
                                                                      c['description'], c['latitude'], c['longitude'],
                                                                      c['elevation'], c['created_at']]])
-
-    def print_all_channels(self):
-        for c in self.all_channels:
-            self.u.printFormatedTable(["Id", "Name", "Description", "Latitude", "Longitude",
-                                       "Created at", "Elevation"], [[c['id'], c['name'],
-                                                                     c['description'], c['latitude'], c['longitude'],
-                                                                     c['elevation'], c['created_at']]])
+            cont += 1
 
     # Method to know how many private and public channels there are
     def get_channels_length(self):
