@@ -83,7 +83,8 @@ def menu_principal(api_key):
     if i.__eq__("back"):
         menu_principal(api_key)
 
-    c = Channel(u, i, indexes[i])
+    Channel(u, i, indexes[i])
+    menu_principal(api_key)
 
 
 if __name__ == '__main__':
