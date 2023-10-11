@@ -30,7 +30,7 @@ class ThingSpeak:
         print("- \t\t\t--\t\t\t------------")
         for c in channels:
             print(str(cont) + "\t\t\t" + str(c['id']) + "\t\t\t" + c['name'] + "\n")
-            indexes[str(cont)] = c['id']
+            indexes[str(cont)] = c
             cont += 1
         return indexes
 

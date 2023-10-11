@@ -24,7 +24,7 @@ class Utils:
         print(req.json())
 
     def printFormatedTable(self, tableHeaders, tableData):
-        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="presto")
+        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="simple_grid")
         print(table)
 
     # Wait method

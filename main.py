@@ -77,15 +77,13 @@ def menu_principal(api_key):
     else:
         indexes = ts.print_channel_index(ts.all_channels)
 
-    print(indexes)
     i = u.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
 
-    print("Esto es indexes: " + str(indexes))
     # Recursive call
     if i.__eq__("back"):
         menu_principal(api_key)
 
-    c = Channel(u, i, indexes)
+    c = Channel(u, i, indexes[i])
 
 
 if __name__ == '__main__':

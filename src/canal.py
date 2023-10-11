@@ -1,8 +1,8 @@
 class Channel:
     def __init__(self, u, index, channel_dict):
         self.u = u
-        self.id = channel_dict["1"]
-        self.name = channel_dict["2"]
+        self.id = channel_dict['id']
+        self.name = channel_dict['name']
         self.print_channel(index, channel_dict)
 
     def __str__(self):
