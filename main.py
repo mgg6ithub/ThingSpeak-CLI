@@ -1,5 +1,6 @@
 from src.thingspeak import ThingSpeak
 from src.utils import Utils
+from src.canal import Channel
 
 from colorama import Fore, init
 import signal
@@ -76,62 +77,15 @@ def menu_principal(api_key):
     else:
         indexes = ts.print_channel_index(ts.all_channels)
 
-    # print(indexes)
-    u.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes, c="c")
-    menu_principal(api_key)
+    print(indexes)
+    i = u.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
 
+    print("Esto es indexes: " + str(indexes))
+    # Recursive call
+    if i.__eq__("back"):
+        menu_principal(api_key)
 
-    #
-    # print(f"En total hay {ts.get_channels_length()} canales\n\n")
-    #
-    # req = ts.get_channels_list()
-    #
-    # u.printRequest(req)
-    #
-    # print(f"En total hay {ts.get_public_channels_length()} canales publicos\n\n")
-    #
-    # req1 = ts.get_public_channels()
-    #
-    # u.printRequest(req1)
-    #
-    # private_channels = 0
-    #
-    # for c in range(0, ts.get_channels_length()):
-    #     if not req.json()[c]["public_flag"]:
-    #         private_channels += 1
-    #
-    # print(f"En total hay {str(private_channels)} canales privados")
-
-    # ts.get_channel_settings("2289652")
-
-    # print()
-    #
-    # length, req1 = ts.get_channels_list()
-    # print(req1.json()[0])
-    #
-    # # ts.main_menu()
-    # # ts.read_settings()
-    #
-    # str_banner = "Menu principal\n" \
-    #              "1 -- Ver canales\n" \
-    #              "2 -- Salir al menu principal\n"
-    #
-    # i = self.u.endless_terminal(str, "1", "2")
-    #
-    # if i == "1":
-    #     length, channels_list = self.get_channels_list()
-    #     if length == 0:
-    #         print("No hay canales")
-    #     else:
-    #         print(f"Hay {length} canales")
-    #         for c in range(0, length):
-    #             self.u.printFormatedTable(["ID", "NAME"],
-    #                                       [[channels_list.json()[c]["id"], channels_list.json()[c]["name"]]])
-    #
-    #         i = input()
-    #         self.main_menu()
-    # elif i == "2":
-    #     return
+    c = Channel(u, i, indexes)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 class ThingSpeak:
-
     def __init__(self, user_apy_key, u):
         self.user_apy_key = user_apy_key
         self.u = u
@@ -25,17 +24,18 @@ class ThingSpeak:
     # Name  Id
     def print_channel_index(self, channels):
         self.u.clear()
-        indexes = []
+        indexes = {}
         cont = 1
         print("Nº\t\t\tID\t\t\tNOMBRE CANAL")
         print("- \t\t\t--\t\t\t------------")
         for c in channels:
             print(str(cont) + "\t\t\t" + str(c['id']) + "\t\t\t" + c['name'] + "\n")
-            indexes.append(str(cont))
+            indexes[str(cont)] = c['id']
             cont += 1
         return indexes
 
     # Method to obtain all the channels from the logged account
+    # {'id': 2299146, 'name': 'Canal1', 'description': 'Esta es la descripcion del canal 1', 'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '', 'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '', 'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT', 'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
     def get_channel_info(self):
         req = self.get_channels_list()
 
@@ -51,17 +51,6 @@ class ThingSpeak:
             return req.json(), len(public_channels), public_channels, len(private_channels), private_channels
         else:
             return None
-
-    # Method to print channels
-    def print_channels(self, channels_to_print):
-
-        cont = 1
-        for c in channels_to_print:
-            self.u.printFormatedTable([" Nº ", "Id", "Name", "Description", "Latitude", "Longitude",
-                                       "Created at", "Elevation"], [[f" CANAL {cont} ", c['id'], c['name'],
-                                                                     c['description'], c['latitude'], c['longitude'],
-                                                                     c['elevation'], c['created_at']]])
-            cont += 1
 
     # Method to know how many private and public channels there are
     def get_channels_length(self):
