@@ -24,8 +24,16 @@ class ThingSpeak:
     # Method to print the overall information of a channel
     # Name  Id
     def print_channel_index(self, channels):
+        self.u.clear()
+        indexes = []
+        cont = 1
+        print("Nº\t\t\tID\t\t\tNOMBRE CANAL")
+        print("- \t\t\t--\t\t\t------------")
         for c in channels:
-            print(str(c['id']) + "\t" + c['name'] + "\n")
+            print(str(cont) + "\t\t\t" + str(c['id']) + "\t\t\t" + c['name'] + "\n")
+            indexes.append(str(cont))
+            cont += 1
+        return indexes
 
     # Method to obtain all the channels from the logged account
     def get_channel_info(self):

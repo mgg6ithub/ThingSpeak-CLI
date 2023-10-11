@@ -5,6 +5,7 @@ from colorama import Fore, init
 import signal
 import sys
 import os
+import pdb
 
 # Instancia global para utilizar la clase utils
 u = Utils()
@@ -69,13 +70,14 @@ def menu_principal(api_key):
     ts = ThingSpeak(api_key, u)
 
     if option == "1":
-        ts.print_channel_index(ts.public_channels)
+        indexes = ts.print_channel_index(ts.public_channels)
     elif option == "2":
-        ts.print_channels(ts.private_channels)
+        indexes = ts.print_channel_index(ts.private_channels)
     else:
-        ts.print_channels(ts.all_channels)
+        indexes = ts.print_channel_index(ts.all_channels)
 
-    u.endless_terminal("Press any key to go back", c="c")
+    # print(indexes)
+    u.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes, c="c")
     menu_principal(api_key)
 
 
