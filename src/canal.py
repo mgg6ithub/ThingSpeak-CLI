@@ -12,11 +12,11 @@ class Channel:
     # Method to print channels
     def print_channel(self, index, channel_dict):
         self.u.clear()
-        self.u.printFormatedTable([" Nº ", "Id", "Name", "Description", "Latitude", "Longitude",
-                                   "Created at", "Elevation"],
-                                  [[f" CANAL {index} ", channel_dict['id'], channel_dict['name'],
-                                    channel_dict['description'], channel_dict['latitude'], channel_dict['longitude'],
-                                    channel_dict['elevation'], channel_dict['created_at']]])
+        self.u.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"], [[f" Channel {index} ", channel_dict['name'],
+                                                                                        channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
+        self.u.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"], [[channel_dict['latitude'], channel_dict['longitude'],
+                                                                                          channel_dict['elevation'], channel_dict['last_entry_id']]])
+        self.u.printFormatedTable(["WRITE API KEY", "READ API KEY"], [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
 
     # Channel options
     def channel_menu(self):
