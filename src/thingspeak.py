@@ -1,3 +1,6 @@
+from src.utils import Utils
+
+
 class ThingSpeak:
     def __init__(self, user_apy_key, u):
         self.user_apy_key = user_apy_key
@@ -16,6 +19,8 @@ class ThingSpeak:
             self.private_channels = private_channels
         else:
             print("No tienes canales ¿Deseas crear un canal?")
+            i = input()
+            self.create_channel(self.user_apy_key)
 
     def __str__(self):
         return str(self.all_channels)
@@ -84,9 +89,33 @@ class ThingSpeak:
     def get_channels_json(self, list):
         pass
 
+    @staticmethod
     # Metodo que obtiene los datos de un canal pasandole su id
-    def get_channel_settings(self, id):
-        req = self.u.make_request(method="GET",
-                                  url=f"https://api.thingspeak.com/channels/{id}.json?api_key={self.user_apy_key}")
+    def get_channel_settings(id, user_api_key):
+        req = Utils.make_request(method="GET",
+                               url=f"https://api.thingspeak.com/channels/{id}.json?api_key={user_api_key}")
+        return req
+
+    # Method to remove a channel
+    @staticmethod
+    def remove_channel(id , user_api_key):
+        body = {"api_key": user_api_key}
+        req = Utils.make_request(method="DELETE", url=f"https://api.thingspeak.com/channels/{id}.json", json=body)
 
         return req
+
+    @staticmethod
+    def create_channel(user_api_key):
+        nombre = input("Enter the new channel name: ")
+        body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{nombre}', 'description': 'Esta es la descripcion del canal 1',
+         'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
+         'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
+         'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
+         'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
+
+        r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
+
+        print(r.status_code)
+        print(r.json())
+
+        i = input()

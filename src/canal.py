@@ -1,3 +1,5 @@
+from src.thingspeak import ThingSpeak
+
 import time
 
 
@@ -5,10 +7,11 @@ class Channel:
     def __init__(self, user_api_key, u, index, channel_dict):
         self.user_api_key = user_api_key
         self.u = u
+        self.index = index
+        self.channel_dict = channel_dict
         self.id = channel_dict['id']
-        self.name = channel_dict['name']
         self.print_channel(index, channel_dict)
-        self.channel_menu()
+
         # self.valid_fields = [
         #     "description",
         #     "field1",
@@ -36,16 +39,18 @@ class Channel:
                                     channel_dict['elevation'], channel_dict['last_entry_id']]])
         self.u.printFormatedTable(["WRITE API KEY", "READ API KEY"],
                                   [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+        self.channel_menu()
 
     # Channel options
     def channel_menu(self):
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                              "------------------\n\n" \
                              "1 -- Modificar canal\n\n" \
-                             "2 -- Modificar canal\n\n\n" \
+                             "2 -- Modificar canal\n\n" \
+                             "3 -- Delete the channel.\n\n" \
                              "Enter \"back\" to go backwards"
 
-        option = self.u.endless_terminal(str_channel_banner, "1", "2", c="c")
+        option = self.u.endless_terminal(str_channel_banner, "1", "2", "3", c="c")
 
         if option.__eq__("back"):
             return
@@ -53,6 +58,12 @@ class Channel:
             self.update_channels_fields()
         elif option.__eq__("2"):
             print("HAS PRESIONADO LA OPCION 2 DEL CANAL")
+        elif option.__eq__("3"):
+            i = input("Are you sure you want to delete the channel? y/n")
+            if i == "y":
+                req = ThingSpeak.remove_channel(self.id, self.user_api_key)
+                if req == 200:
+                    print("Channel successfully deleted!")
         i = input()
 
     # Method to update channel fields
@@ -78,13 +89,16 @@ class Channel:
 
             if i.__eq__("ok"):
                 break
-            
+
             new_value = input(f"Type a new value for {i}: ")
             body[i] = new_value
 
         i = self.u.make_request(method="PUT", url=api_url, json=body)
-        print(i.status_code)
 
+        if i.status_code == 200:
+            # self.print_channel(self.index, )
+            self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
+            self.print_channel(self.index, self.channel_dict)
 
 
 

@@ -63,8 +63,9 @@ class Utils:
     def list_to_json(self, lista):
         return json.dumps(lista)
 
+    @staticmethod
     # Method to make http requests
-    def make_request(self, **kwargs):
+    def make_request(**kwargs):
         try:
             r = requests.request(**kwargs)
         except requests.exceptions.HTTPError as err:
