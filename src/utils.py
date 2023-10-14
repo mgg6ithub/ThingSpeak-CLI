@@ -56,7 +56,7 @@ class Utils:
 
         while True:
             i = str(input(Fore.GREEN + "ts> " + Fore.WHITE))
-            if i in options or i.__eq__("back"):
+            if i in options or i.__eq__("back") or i.__eq__("ok"):
                 return i
 
     # Metodo para convertir una lista a un objeto json
