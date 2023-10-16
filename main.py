@@ -90,7 +90,11 @@ def menu_principal(api_key):
 if __name__ == '__main__':
     # main()
     # login()
-    menu_principal("0WX1WIYR7G3QMKUR")
+    # menu_principal("0WX1WIYR7G3QMKUR")
     # ts = ThingSpeak("0WX1WIYR7G3QMKUR", u)
-
+    req = ThingSpeak.get_channel_fields("2306032", "Z20S6M6P1MGUFE1A")
+    print(req.status_code)
+    print(req.json())
+    print(req.text)
+    print(req.reason)
     # print(ts.__str__())

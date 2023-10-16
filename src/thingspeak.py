@@ -119,3 +119,9 @@ class ThingSpeak:
         print(r.json())
 
         i = input()
+
+    @staticmethod
+    def get_channel_fields(channel_id, api_key):
+
+        return Utils.make_request(method="GET", url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
+        # return Utils.make_request(method="GET", url=f"https://api.thingspeak.com/channels/{channel_id}/fields/3 .json?api_key={api_key}")
