@@ -93,12 +93,12 @@ class ThingSpeak:
     # Metodo que obtiene los datos de un canal pasandole su id
     def get_channel_settings(id, user_api_key):
         req = Utils.make_request(method="GET",
-                               url=f"https://api.thingspeak.com/channels/{id}.json?api_key={user_api_key}")
+                                 url=f"https://api.thingspeak.com/channels/{id}.json?api_key={user_api_key}")
         return req
 
     # Method to remove a channel
     @staticmethod
-    def remove_channel(id , user_api_key):
+    def remove_channel(id, user_api_key):
         body = {"api_key": user_api_key}
         req = Utils.make_request(method="DELETE", url=f"https://api.thingspeak.com/channels/{id}.json", json=body)
 
@@ -107,11 +107,14 @@ class ThingSpeak:
     @staticmethod
     def create_channel(user_api_key):
         nombre = input("Enter the new channel name: ")
-        body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{nombre}', 'description': 'Esta es la descripcion del canal 1',
-         'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
-         'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
-         'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
-         'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
+        body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{nombre}',
+                'description': 'Esta es la descripcion del canal 1',
+                'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
+                'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
+                'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
+                                                                               'write_flag': True},
+                                                                              {'api_key': '97NQ78KHK1PK7RP7',
+                                                                               'write_flag': False}]}
 
         r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
 
@@ -120,8 +123,16 @@ class ThingSpeak:
 
         i = input()
 
+    # Method to update inforamtion of the channel
+    @staticmethod
+    def update_channel_information(channel_id, updated_information):
+        update_channel_information_url = f"https://api.thingspeak.com/channels/{channel_id}.json"
+        return Utils.make_request(method="PUT", url=update_channel_information_url, json=updated_information)
+
+    # Method to retrieve a channel fields
     @staticmethod
     def get_channel_fields(channel_id, api_key):
+        return Utils.make_request(method="GET",
+                                 url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
 
-        return Utils.make_request(method="GET", url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
-        # return Utils.make_request(method="GET", url=f"https://api.thingspeak.com/channels/{channel_id}/fields/3 .json?api_key={api_key}")
+
