@@ -1,75 +1,98 @@
+import time
+
 from src.thingspeak import ThingSpeak
 from src.utils import Utils
+from src.canal import Channel
 
-from colorama import Fore, Back, Style, init
-import requests
+from colorama import Fore, init
 import signal
 import sys
-import time
 import os
+import pdb
+import psutil
 
-
-# login_url = "https://thingspeak.com/login?skipSSOCheck=true"
-#
-# email = "yaxeb66148@nickolis.com"
-# password = "Cuenta2314"
+# Instancia global para utilizar la clase utils
+u = Utils()
+init()
 
 
 def signal_handler(signum, frame):
     os.system("clear")
-    print()
     print(Fore.RED + "Saliendo de TS")
-    time.sleep(1)
+    u.wait_animation(1)
     sys.exit(1)
 
 
-def main():
-    # URL inicial de inicio de sesión en ThingSpeak
-    login_url = 'https://thingspeak.com/login?skipSSOCheck=true'
-
-    # Tus credenciales de inicio de sesión
-    email = 'tu_correo_electronico'
-    password = 'tu_contraseña'
-
-    # Realiza la primera solicitud GET a la página de inicio de sesión
-    session = requests.session()
-    response = session.get(login_url)
-
-    print(response.text)
+signal.signal(signal.SIGINT, signal_handler)
 
 
-def menu():
-    signal.signal(signal.SIGINT, signal_handler)
+# Metodo para comprobar la clave ingresada
+def checkUserApyKey(apy_key):
+    u.clear()
     init()
-    u = Utils()
+    req = u.make_request(method="GET",
+                         url=f"https://api.thingspeak.com/channels.json?api_key={apy_key}")
 
+    if req.status_code == 200:
+        return True
+    elif req.status_code == 401:
+        return False
+
+
+def login():
     while True:
         u.clear()
-        print("1. Iniciar Sesion con CREDENCIALES.\n")
-        print("2. Iniciar sesion con APY KEY.\n")
-        print("CTRL + C para salir en cualquier momento.\n")
+        str_banner = "1. Iniciar Sesion con CREDENCIALES.\n\n" \
+                     "2. Iniciar sesion con APY KEY.\n\n" \
+                     "CTRL + C para salir en cualquier momento.\n"
 
-        i = input(Fore.GREEN + "ts:> " + Fore.WHITE)
+        option = u.endless_terminal(str_banner, "1", "2")
+        u.clear()
 
-        if i == "2":
-            apy_key = input("Introduce tu apy key: ")
+        if option == "2":
+            api_key = input("Introduce tu apy key: ")
 
-            ts = ThingSpeak(apy_key)
-            c = ts.checkUserApyKey()
-            try:
-                u.hide_cursor()
-                u.wait(2)
-                u.show_cursor()
-                u.clear()
-            finally:
-                u.cleanup()
+            if checkUserApyKey(api_key):
+                print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
+                u.wait_animation(1)
+                # ts = ThingSpeak(api_key, u)
+                # menu_principal(api_key)
+            else:
+                print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
+                u.wait_animation(1)
+        i = input()
 
-            if c:
-                print("MENU DEL CANAL")
 
-                i = input()
+# Menu de la cuenta ThigSpeak
+def menu_principal(api_key):
+    str_banner = "1 -- Ver canales públicos.\n\n" \
+                 "2 -- Ver canales privados.\n\n" \
+                 "3 -- Ver todos los canales\n\n"
+
+    option = u.endless_terminal(str_banner, "1", "2", "3")
+
+    ts = ThingSpeak(api_key, u)
+
+    if option == "1":
+        indexes = ts.print_channel_index(ts.public_channels)
+    elif option == "2":
+        indexes = ts.print_channel_index(ts.private_channels)
+    else:
+        indexes = ts.print_channel_index(ts.all_channels)
+
+    i = u.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
+
+    # Recursive call
+    if i.__eq__("back"):
+        menu_principal(api_key)
+
+    Channel(api_key, u, i, indexes[i])
+    menu_principal(api_key)
 
 
 if __name__ == '__main__':
     # main()
-    menu()
+    # login()
+    menu_principal("0WX1WIYR7G3QMKUR")
+    # ts = ThingSpeak("0WX1WIYR7G3QMKUR", u)
+    # ThingSpeak.get_channel_fields("2308575", "PV7WQT3JLL7KYNV0")
