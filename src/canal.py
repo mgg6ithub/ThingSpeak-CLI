@@ -1,4 +1,4 @@
-from src.utils import Utils
+from src.utils import Utils, MenuStack
 
 import time
 from src.thingspeak import ThingSpeak
@@ -6,9 +6,8 @@ import psutil
 
 
 class Channel:
-    def __init__(self, user_api_key, u, index, channel_dict):
+    def __init__(self, user_api_key, index, channel_dict):
         self.user_api_key = user_api_key
-        self.u = u
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
@@ -19,24 +18,27 @@ class Channel:
 
     # Method to print channels
     def print_channel(self, index, channel_dict):
-        self.u.clear()
+        Utils.clear()
         field_index_list, field_index_names = self.view_channel_fields()
 
-        self.u.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
+        Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
                                   [[f" Channel {index} ", channel_dict['name'],
                                     channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
-        self.u.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
+        Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
                                   [[channel_dict['latitude'], channel_dict['longitude'],
                                     channel_dict['elevation'], channel_dict['last_entry_id']]])
-        self.u.printFormatedTable(["WRITE API KEY", "READ API KEY"],
+        Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
                                   [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
 
-        self.u.printFormatedTable(field_index_list, [field_index_names])
+        Utils.printFormatedTable(field_index_list, [field_index_names])
 
         self.channel_menu()
 
     # Channel options
     def channel_menu(self):
+
+        MenuStack.push("channel_menu")
+
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                              "------------------\n\n" \
                              "1 -- Modificar canal\n\n" \
@@ -48,7 +50,7 @@ class Channel:
                              "7 -- Read field data.\n\n" \
                              "Enter \"back\" to go backwards"
 
-        option = self.u.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
+        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
 
         if option.__eq__("back"):
             return
@@ -91,7 +93,7 @@ class Channel:
         updated_information = {"api_key": self.user_api_key}
         print("Enter the field/s value you want to change(Enter \"ok\" to finish).")
         while True:
-            i = self.u.endless_terminal("Type a field: ", *valid_fields, c="c")
+            i = Utils.endless_terminal("Type a field: ", *valid_fields, c="c")
 
             if i.__eq__("ok"):
                 break

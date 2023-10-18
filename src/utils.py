@@ -7,51 +7,62 @@ import json
 from colorama import Fore
 from tabulate import tabulate
 
+# Define la variable global
+clear_command = "cls" if platform.system() == "Windows" else "clear"
+
 
 class Utils:
 
     def __init__(self):
         self.clear_command = "cls" if platform.system() == "Windows" else "clear"
 
+    @staticmethod
     # Clear screen method
-    def clear(self):
-        return_code = os.system(self.clear_command)
+    def clear():
+        return_code = os.system(clear_command)
         if return_code != 0:
             print("Error al limpiar la pantalla")
 
-    def printRequest(self, req):
+    @staticmethod
+    def printRequest(req):
         print(req.status_code)
         print(req.json())
 
-    def printFormatedTable(self, tableHeaders, tableData):
+    @staticmethod
+    def printFormatedTable(tableHeaders, tableData):
         table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="simple_grid", stralign="center")
         print(table)
         print("\n")
 
+    @staticmethod
     # Wait method
-    def wait(self, t):
+    def wait(t):
         try:
             time.sleep(t)
         except KeyboardInterrupt:
             print("Has interrumpido la espera del programa.\n")
 
-    def hide_cursor(self):
-        print("\x1b[?25l") # hidden
+    @staticmethod
+    def hide_cursor():
+        print("\x1b[?25l")  # hidden
 
-    def show_cursor(self):
-        print("\x1b[?25h") # shown
+    @staticmethod
+    def show_cursor():
+        print("\x1b[?25h")  # shown
 
+    @staticmethod
     # Wait and hide cursor
-    def wait_animation(self, time_to_wait):
-        self.hide_cursor()
-        self.wait(time_to_wait)
-        self.show_cursor()
+    def wait_animation(time_to_wait):
+        Utils.hide_cursor()
+        Utils.wait(time_to_wait)
+        Utils.show_cursor()
 
+    @staticmethod
     # Endless ThingSpeak -CLI terminal
-    def endless_terminal(self, message, *options, c=None):
+    def endless_terminal(message, *options, c=None):
 
         if c is None:
-            self.clear()
+            Utils.clear()
         print(message + "\n")
 
         while True:
@@ -59,8 +70,9 @@ class Utils:
             if i in options or i.__eq__("back") or i.__eq__("ok"):
                 return i
 
+    @staticmethod
     # Metodo para convertir una lista a un objeto json
-    def list_to_json(self, lista):
+    def list_to_json(lista):
         return json.dumps(lista)
 
     @staticmethod
@@ -81,3 +93,24 @@ class Utils:
             print("Comprueba que el protocolo es correcto.\nEjemplo -> https://")
         else:
             return r
+
+
+stack = []
+
+
+# Class to control the flow of menus using a stack
+class MenuStack:
+
+    def push(option):
+        stack.append(option)
+        print(stack)
+        input()
+
+    def pop(self):
+        if len(stack) > 1:
+            stack.pop()
+        else:
+            print("No puedes retroceder más.")
+
+    def current(self):
+        return stack[-1]

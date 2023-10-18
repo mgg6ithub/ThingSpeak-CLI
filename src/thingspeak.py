@@ -2,9 +2,8 @@ from src.utils import Utils
 
 
 class ThingSpeak:
-    def __init__(self, user_apy_key, u):
+    def __init__(self, user_apy_key):
         self.user_apy_key = user_apy_key
-        self.u = u
 
         account_channels_info = self.get_channel_info()
 
@@ -28,7 +27,7 @@ class ThingSpeak:
     # Method to print the overall information of a channel
     # Name  Id
     def print_channel_index(self, channels):
-        self.u.clear()
+        Utils.clear()
         indexes = {}
         cont = 1
         print("Nº\t\t\tID\t\t\tNOMBRE CANAL")
@@ -67,7 +66,7 @@ class ThingSpeak:
 
     # Method to get the list of all existing channels
     def get_channels_list(self):
-        req = self.u.make_request(method="GET",
+        req = Utils.make_request(method="GET",
                                   url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
         return req
 
@@ -77,7 +76,7 @@ class ThingSpeak:
 
     # Method to get the list of all public channels
     def get_public_channels(self):
-        req = self.u.make_request(method="GET",
+        req = Utils.make_request(method="GET",
                                   url="https://api.thingspeak.com/users/mwa0000031155118/channels.json")
         return req
 
@@ -133,6 +132,4 @@ class ThingSpeak:
     @staticmethod
     def get_channel_fields(channel_id, api_key):
         return Utils.make_request(method="GET",
-                                 url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
-
-
+                                  url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
