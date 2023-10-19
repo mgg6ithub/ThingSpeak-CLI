@@ -1,13 +1,13 @@
-import time
-
 from src.thingspeak import ThingSpeak
 from src.utils import Utils
 from src.canal import Channel
 
+import keyboard
 from colorama import Fore, init
 import signal
 import sys
 import os
+import pdb
 
 # u = Utils()
 init()
@@ -25,11 +25,11 @@ signal.signal(signal.SIGINT, signal_handler)
 
 
 # Metodo para comprobar la clave ingresada
-def checkUserApyKey(apy_key):
+def checkUserApyKey(user_api_key):
     Utils.clear()
     init()
     req = Utils.make_request(method="GET",
-                         url=f"https://api.thingspeak.com/channels.json?api_key={apy_key}")
+                             url=f"https://api.thingspeak.com/channels.json?api_key={user_api_key}")
 
     if req.status_code == 200:
         return True
@@ -48,13 +48,13 @@ def login():
         Utils.clear()
 
         if option == "2":
-            api_key = input("Introduce tu apy key: ")
+            user_api_key = input("Introduce tu apy key: ")
 
-            if checkUserApyKey(api_key):
+            if checkUserApyKey(user_api_key):
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
                 Utils.wait_animation(1)
-                # ts = ThingSpeak(api_key, u)
-                # menu_principal(api_key)
+                # ts = ThingSpeak(user_api_key, u)
+                # menu_principal(user_api_key)
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 Utils.wait_animation(1)
@@ -62,31 +62,39 @@ def login():
 
 
 # ThingSpeak menu Method
-def menu_principal(api_key):
+def menu_principal(user_api_key):
+    ts = ThingSpeak(user_api_key)
 
-    str_banner = "1 -- Ver canales públicos.\n\n" \
-                 "2 -- Ver canales privados.\n\n" \
-                 "3 -- Ver todos los canales\n\n"
+    if ts.hayCanales:
 
-    option = Utils.endless_terminal(str_banner, "1", "2", "3")
+        str_banner = "1 -- Ver canales públicos.\n\n" \
+                     "2 -- Ver canales privados.\n\n" \
+                     "3 -- Ver todos los canales\n\n"
 
-    ts = ThingSpeak(api_key)
+        option = Utils.endless_terminal(str_banner, "1", "2", "3")
 
-    if option == "1":
-        indexes = ts.print_channel_index(ts.public_channels)
-    elif option == "2":
-        indexes = ts.print_channel_index(ts.private_channels)
+        if option.__eq__("b"):
+            keyboard.press_and_release('ctrl+c')
+
+        if option == "1":
+            indexes = ts.print_channel_index(ts.public_channels)
+        elif option == "2":
+            indexes = ts.print_channel_index(ts.private_channels)
+        else:
+            indexes = ts.print_channel_index(ts.all_channels)
+
+        i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
+
+        Channel(user_api_key, i, indexes[i])
+
     else:
-        indexes = ts.print_channel_index(ts.all_channels)
-
-    i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
-
-    # Recursive call
-    if i.__eq__("back"):
-        menu_principal(api_key)
-
-    Channel(api_key, i, indexes[i])
-    menu_principal(api_key)
+        i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
+                               tty=False)
+        if i.__eq__("y"):
+            ts.create_channel(user_api_key)
+        else:
+            pass
+    menu_principal(user_api_key)
 
 
 if __name__ == '__main__':

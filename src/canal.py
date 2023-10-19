@@ -20,18 +20,24 @@ class Channel:
     # Method to print channels
     def print_channel(self, index, channel_dict):
         Utils.clear()
-        field_index_list, field_index_names = self.view_channel_fields()
 
-        Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-                                 [[f" Channel {index} ", channel_dict['name'],
-                                   channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
-        Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-                                 [[channel_dict['latitude'], channel_dict['longitude'],
-                                   channel_dict['elevation'], channel_dict['last_entry_id']]])
-        Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-                                 [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+        fields_of_channel = self.view_channel_fields()
 
-        Utils.printFormatedTable(field_index_list, [field_index_names])
+        if fields_of_channel is not None:
+            field_index_list, field_index_names = fields_of_channel
+
+            Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
+                                     [[f" Channel {index} ", channel_dict['name'],
+                                       channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
+            Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
+                                     [[channel_dict['latitude'], channel_dict['longitude'],
+                                       channel_dict['elevation'], channel_dict['last_entry_id']]])
+            Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
+                                     [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+
+            Utils.printFormatedTable(field_index_list, [field_index_names])
+        else:
+            return
 
     # Channel options
     def channel_menu(self):
@@ -48,6 +54,9 @@ class Channel:
 
         option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
 
+        if option.__eq__("b"):
+            return
+
         if option.__eq__("back"):
             return
         elif option.__eq__("1"):
@@ -61,11 +70,14 @@ class Channel:
         elif option.__eq__("2"):
             self.view_channel_fields()
         elif option.__eq__("3"):
-            i = input("Are you sure you want to delete the channel? y/n")
+            i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
             if i == "y":
                 req = ThingSpeak.remove_channel(self.id, self.user_api_key)
-                if req == 200:
+                if req.status_code == 200:
                     print("Channel successfully deleted!")
+                    Utils.wait(2)
+                    return
+                    # self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
         elif option.__eq__("4"):
             self.create_fields_in_channel()
         elif option.__eq__("5"):
@@ -76,9 +88,12 @@ class Channel:
             self.read_data("1")
             self.read_data("2")
         Utils.clear()
+        input()
         print("OK")
         Utils.wait(2)
-        self.print_channel(self.index, self.channel_dict)
+        if self.print_channel(self.index, self.channel_dict) is None:
+            return
+        self.channel_menu()
 
     # Method to update channel fields
     def update_channels_information(self):
@@ -104,6 +119,10 @@ class Channel:
                              "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
         i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
+
+        if i.__eq__("b"):
+            return True
+
         entries = i.split(",")
 
         for entry in entries:
@@ -128,8 +147,6 @@ class Channel:
     def view_channel_fields(self):
         req = ThingSpeak.get_channel_fields(self.id, self.channel_dict['api_keys'][1]['api_key'])
 
-        # fields_dict = {}
-
         if req.status_code == 200:
             channel_data = req.json()
 
@@ -139,12 +156,14 @@ class Channel:
                 field = "field" + str(i)
 
                 if field in channel_data['channel']:
-                    # print(field + ":" + channel_data['channel'][field])
-                    # fields_dict[field] = channel_data['channel'][field]
                     fields_index.append(field)
                     fields_name.append(channel_data['channel'][field])
 
-            return fields_index, fields_name
+            if len(fields_index) > 0 and len(fields_name) > 0:
+                return fields_index, fields_name
+            else:
+                return None
+
 
     # Method to remove the fields froma a channel
     def remove_fields_from_channel(self):
@@ -179,9 +198,6 @@ class Channel:
             print("New fields created.")
             time.sleep(2)
 
-    # Method to upload data to a field
-    # def upload_data_to_field(self):
-    #     pass
     def subir_datos_practica(self):
         i = 0
         while i < 100:

@@ -4,10 +4,12 @@ from src.utils import Utils
 class ThingSpeak:
     def __init__(self, user_apy_key):
         self.user_apy_key = user_apy_key
+        self.hayCanales = False
 
-        account_channels_info = self.get_channel_info()
+        account_channels_info = self.get_account_info()
 
         if account_channels_info and account_channels_info[0]:
+            self.hayCanales = True
             all_channels, len_public_channels, public_channels, len_private_channels, private_channels = account_channels_info
 
             self.len_all_channels = len_public_channels + len_private_channels
@@ -17,12 +19,10 @@ class ThingSpeak:
             self.len_private_channels = len_private_channels
             self.private_channels = private_channels
         else:
-            print("No tienes canales ¿Deseas crear un canal?")
-            i = input()
-            self.create_channel(self.user_apy_key)
+            return
 
-    def __str__(self):
-        return str(self.all_channels)
+    # def __str__(self):
+    #     return str(self.all_channels)
 
     # Method to print the overall information of a channel
     # Name  Id
@@ -44,7 +44,7 @@ class ThingSpeak:
     # 'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
     # 'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
     # 'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
-    def get_channel_info(self):
+    def get_account_info(self):
         req = self.get_channels_list()
 
         if req.status_code == 200 and req.json() is not None:
