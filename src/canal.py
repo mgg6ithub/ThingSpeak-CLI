@@ -1,4 +1,4 @@
-from src.utils import Utils, MenuStack
+from src.utils import Utils
 
 import time
 from src.thingspeak import ThingSpeak
@@ -11,7 +11,8 @@ class Channel:
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
-        self.print_channel(index, channel_dict)
+        self.print_channel(self.index, self.channel_dict)
+        self.channel_menu()
 
     def __str__(self):
         return
@@ -22,23 +23,18 @@ class Channel:
         field_index_list, field_index_names = self.view_channel_fields()
 
         Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-                                  [[f" Channel {index} ", channel_dict['name'],
-                                    channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
+                                 [[f" Channel {index} ", channel_dict['name'],
+                                   channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
         Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-                                  [[channel_dict['latitude'], channel_dict['longitude'],
-                                    channel_dict['elevation'], channel_dict['last_entry_id']]])
+                                 [[channel_dict['latitude'], channel_dict['longitude'],
+                                   channel_dict['elevation'], channel_dict['last_entry_id']]])
         Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-                                  [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+                                 [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
 
         Utils.printFormatedTable(field_index_list, [field_index_names])
 
-        self.channel_menu()
-
     # Channel options
     def channel_menu(self):
-
-        MenuStack.push("channel_menu")
-
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                              "------------------\n\n" \
                              "1 -- Modificar canal\n\n" \
@@ -55,7 +51,13 @@ class Channel:
         if option.__eq__("back"):
             return
         elif option.__eq__("1"):
-            self.update_channels_information()
+
+            modify_state = self.update_channels_information()
+            while not modify_state:
+                print("Has introducido mal algun campo")
+                Utils.wait(2)
+                modify_state = self.update_channels_information()
+
         elif option.__eq__("2"):
             self.view_channel_fields()
         elif option.__eq__("3"):
@@ -73,14 +75,19 @@ class Channel:
         elif option.__eq__("7"):
             self.read_data("1")
             self.read_data("2")
-        i = input()
+        Utils.clear()
+        print("OK")
+        Utils.wait(2)
+        self.print_channel(self.index, self.channel_dict)
 
     # Method to update channel fields
     def update_channels_information(self):
-        valid_fields = [
-            "description",
-            "field1",
+
+        self.print_channel(self.index, self.channel_dict)
+
+        valid_fields_to_modify = [
             "latitude",
+            "description",
             "longitude",
             "elevation",
             "metadata",
@@ -91,21 +98,31 @@ class Channel:
         ]
 
         updated_information = {"api_key": self.user_api_key}
-        print("Enter the field/s value you want to change(Enter \"ok\" to finish).")
-        while True:
-            i = Utils.endless_terminal("Type a field: ", *valid_fields, c="c")
+        str_modify_message = "Modify the values of your channel.\n" \
+                             "Examples\n" \
+                             "ts> name:NEW CHANNEL NAME\n" \
+                             "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
-            if i.__eq__("ok"):
-                break
+        i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
+        entries = i.split(",")
 
-            new_value = input(f"Type a new value for {i}: ")
-            updated_information[i] = new_value
+        for entry in entries:
+            key, value = entry.split(":")
+            key = key.strip()  # Asegúrate de que no haya espacios en blanco
+            value = value.strip()  # Asegúrate de que no haya espacios en blanco
+
+            if key in valid_fields_to_modify:
+                updated_information[key] = value
+            else:
+                return False
 
         req = ThingSpeak.update_channel_information(self.id, updated_information)
 
         if req.status_code == 200:
             self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-            self.print_channel(self.index, self.channel_dict)
+            return True
+
+        return False  # Maneja casos en los que la solicitud no fue exitosa
 
     # Method to view the fields of the channel
     def view_channel_fields(self):

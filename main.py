@@ -1,7 +1,7 @@
 import time
 
 from src.thingspeak import ThingSpeak
-from src.utils import Utils, MenuStack
+from src.utils import Utils
 from src.canal import Channel
 
 from colorama import Fore, init
@@ -63,8 +63,6 @@ def login():
 
 # ThingSpeak menu Method
 def menu_principal(api_key):
-
-    MenuStack.push("menu_principal")
 
     str_banner = "1 -- Ver canales públicos.\n\n" \
                  "2 -- Ver canales privados.\n\n" \

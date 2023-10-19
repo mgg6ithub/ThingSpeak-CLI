@@ -9,6 +9,7 @@ from tabulate import tabulate
 
 # Define la variable global
 clear_command = "cls" if platform.system() == "Windows" else "clear"
+menu_stack = []
 
 
 class Utils:
@@ -59,7 +60,7 @@ class Utils:
 
     @staticmethod
     # Endless ThingSpeak -CLI terminal
-    def endless_terminal(message, *options, c=None):
+    def endless_terminal(message, *options, c=None, exit=False):
 
         if c is None:
             Utils.clear()
@@ -67,7 +68,7 @@ class Utils:
 
         while True:
             i = str(input(Fore.GREEN + "ts> " + Fore.WHITE))
-            if i in options or i.__eq__("back") or i.__eq__("ok"):
+            if i in options or i.__eq__("b") or exit:
                 return i
 
     @staticmethod
@@ -94,23 +95,16 @@ class Utils:
         else:
             return r
 
+    @staticmethod
+    def push(menu_method):
+        menu_stack.append(menu_method)
 
-stack = []
+    @staticmethod
+    def pop():
+        if not Utils.isEmpty():
+            menu_stack.pop()
 
 
-# Class to control the flow of menus using a stack
-class MenuStack:
-
-    def push(option):
-        stack.append(option)
-        print(stack)
-        input()
-
-    def pop(self):
-        if len(stack) > 1:
-            stack.pop()
-        else:
-            print("No puedes retroceder más.")
-
-    def current(self):
-        return stack[-1]
+    @staticmethod
+    def isEmpty():
+        return len(menu_stack) == 0
