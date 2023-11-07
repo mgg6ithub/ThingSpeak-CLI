@@ -4,7 +4,6 @@ import time
 from src.thingspeak import ThingSpeak
 import psutil
 
-
 class Channel:
     def __init__(self, user_api_key, index, channel_dict):
         self.user_api_key = user_api_key
@@ -27,13 +26,13 @@ class Channel:
             field_index_list, field_index_names = fields_of_channel
 
             Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-                                     [[f" Channel {index} ", channel_dict['name'],
-                                       channel_dict['id'], channel_dict['created_at'], channel_dict['description']]])
+                                    [[f" Channel {index} ", channel_dict['name'],
+                                    channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
             Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-                                     [[channel_dict['latitude'], channel_dict['longitude'],
-                                       channel_dict['elevation'], channel_dict['last_entry_id']]])
+                                    [[channel_dict['latitude'], channel_dict['longitude'],
+                                    channel_dict['elevation'], channel_dict['last_entry_id']]])
             Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-                                     [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+                                    [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
 
             Utils.printFormatedTable(field_index_list, [field_index_names])
         else:
@@ -42,15 +41,15 @@ class Channel:
     # Channel options
     def channel_menu(self):
         str_channel_banner = "OPCIONES DEL CANAL\n" \
-                             "------------------\n\n" \
-                             "1 -- Modificar canal\n\n" \
-                             "2 -- See channel fields\n\n" \
-                             "3 -- Delete the channel.\n\n" \
-                             "4 -- Create fields for uploading data.\n\n" \
-                             "5 -- Delete fields from channel.\n\n" \
-                             "6 -- Upload data.\n\n" \
-                             "7 -- Read field data.\n\n" \
-                             "Enter \"back\" to go backwards"
+                            "------------------\n\n" \
+                            "1 -- Modificar canal\n\n" \
+                            "2 -- See channel fields\n\n" \
+                            "3 -- Delete the channel.\n\n" \
+                            "4 -- Create fields for uploading data.\n\n" \
+                            "5 -- Delete fields from channel.\n\n" \
+                            "6 -- Upload data.\n\n" \
+                            "7 -- Read field data.\n\n" \
+                            "Enter \"back\" to go backwards"
 
         option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
 
@@ -83,7 +82,7 @@ class Channel:
         elif option.__eq__("5"):
             self.remove_fields_from_channel()
         elif option.__eq__("6"):
-            self.subir_datos_practica()
+            self.subir_datos()
         elif option.__eq__("7"):
             self.read_data("1")
             self.read_data("2")
@@ -114,9 +113,9 @@ class Channel:
 
         updated_information = {"api_key": self.user_api_key}
         str_modify_message = "Modify the values of your channel.\n" \
-                             "Examples\n" \
-                             "ts> name:NEW CHANNEL NAME\n" \
-                             "ts> name:NEW CHANNEL NAME,description:This is the new description"
+                            "Examples\n" \
+                            "ts> name:NEW CHANNEL NAME\n" \
+                            "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
         i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
 
@@ -164,7 +163,6 @@ class Channel:
             else:
                 return None
 
-
     # Method to remove the fields froma a channel
     def remove_fields_from_channel(self):
 
@@ -173,7 +171,7 @@ class Channel:
         for ite in range(1, 9):
             fichero_json[f"field{ite}"] = ""
         r = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-                               json=fichero_json)
+                            json=fichero_json)
         print(r.status_code)
         if r.status_code == 200:
             print("Fields have been deleted")
@@ -193,12 +191,12 @@ class Channel:
             i = input("->")
 
         req = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-                                 json=new_fields)
+                                json=new_fields)
         if req.status_code == 200:
             print("New fields created.")
             time.sleep(2)
 
-    def subir_datos_practica(self):
+    def subir_datos(self):
         i = 0
         while i < 100:
             cpu = psutil.cpu_percent()  # USO DE LA CPU
@@ -226,10 +224,11 @@ class Channel:
         print(f"\rUSO DE LA CPU: |{cpu_carga}| {cpu:.2f}%", end="")
         print(f"\tUSO DE LA RAM: |{ram_carga}| {ram:.2f}%", end="\r")
 
-    # Method to read data from on especific field
+    # Method to read data from a especific field
     def read_data(self, field_id):
         url_read_data_field = f"https://api.thingspeak.com/channels/{self.id}/fields/{field_id}.json?results=100&api_key={self.channel_dict['api_keys'][1]['api_key']}"
         req = Utils.make_request(method="GET", url=url_read_data_field)
 
         print(req.status_code)
         print(req.json()['feeds'])
+        input()

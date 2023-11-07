@@ -29,7 +29,7 @@ def checkUserApyKey(user_api_key):
     Utils.clear()
     init()
     req = Utils.make_request(method="GET",
-                             url=f"https://api.thingspeak.com/channels.json?api_key={user_api_key}")
+                            url=f"https://api.thingspeak.com/channels.json?api_key={user_api_key}")
 
     if req.status_code == 200:
         return True
@@ -41,8 +41,8 @@ def login():
     while True:
         Utils.clear()
         str_banner = "1. Iniciar Sesion con CREDENCIALES.\n\n" \
-                     "2. Iniciar sesion con APY KEY.\n\n" \
-                     "CTRL + C para salir en cualquier momento.\n"
+                    "2. Iniciar sesion con APY KEY.\n\n" \
+                    "CTRL + C para salir en cualquier momento.\n"
 
         option = Utils.endless_terminal(str_banner, "1", "2")
         Utils.clear()
@@ -68,8 +68,8 @@ def menu_principal(user_api_key):
     if ts.hayCanales:
 
         str_banner = "1 -- Ver canales públicos.\n\n" \
-                     "2 -- Ver canales privados.\n\n" \
-                     "3 -- Ver todos los canales\n\n"
+                    "2 -- Ver canales privados.\n\n" \
+                    "3 -- Ver todos los canales\n\n"
 
         option = Utils.endless_terminal(str_banner, "1", "2", "3")
 
@@ -89,7 +89,7 @@ def menu_principal(user_api_key):
 
     else:
         i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
-                               tty=False)
+                            tty=False)
         if i.__eq__("y"):
             ts.create_channel(user_api_key)
         else:

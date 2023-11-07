@@ -1,6 +1,5 @@
 import os
 import requests
-import sys
 import platform
 import time
 import json
@@ -31,7 +30,7 @@ class Utils:
 
     @staticmethod
     def printFormatedTable(tableHeaders, tableData):
-        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="simple_grid", stralign="center")
+        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center")
         print(table)
         print("\n")
 
@@ -107,7 +106,14 @@ class Utils:
         if not Utils.isEmpty():
             menu_stack.pop()
 
-
     @staticmethod
     def isEmpty():
         return len(menu_stack) == 0
+    
+    # Method to separate the date fields
+    # 2023-10-23T19:39:03Z
+    @staticmethod
+    def format_date(date):
+        ymd = date.split("T")[0]
+        time = date.split("T")[1].split("Z")[0]
+        return str(ymd) + " " + str(time)
