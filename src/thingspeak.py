@@ -4,21 +4,7 @@ class ThingSpeak:
     def __init__(self, user_apy_key):
         self.user_apy_key = user_apy_key
         self.hayCanales = False
-
-        account_channels_info = self.get_account_info()
-
-        if account_channels_info and account_channels_info[0]:
-            self.hayCanales = True
-            all_channels, len_public_channels, public_channels, len_private_channels, private_channels = account_channels_info
-
-            self.len_all_channels = len_public_channels + len_private_channels
-            self.all_channels = all_channels
-            self.len_public_channels = len_public_channels
-            self.public_channels = public_channels
-            self.len_private_channels = len_private_channels
-            self.private_channels = private_channels
-        else:
-            return
+        self.get_account_info()
 
     # def __str__(self):
     #     return str(self.all_channels)
@@ -46,7 +32,12 @@ class ThingSpeak:
     def get_account_info(self):
         req = self.get_channels_list()
 
-        if req.status_code == 200 and req.json() is not None:
+        channels = req.json()
+        channel_number = len(req.json())
+
+        if req.status_code == 200 and channel_number is not 0:
+            self.hayCanales = True
+
             public_channels = []
             private_channels = []
 
@@ -55,9 +46,15 @@ class ThingSpeak:
                     public_channels.append(c)
                 else:
                     private_channels.append(c)
-            return req.json(), len(public_channels), public_channels, len(private_channels), private_channels
+
+            self.len_all_channels = channel_number
+            self.all_channels = channels
+            self.len_public_channels = len(public_channels)
+            self.public_channels = public_channels
+            self.len_private_channels = len(private_channels)
+            self.private_channels = private_channels
         else:
-            return None
+            self.hayCanales = False
 
     # Method to know how many private and public channels there are
     def get_channels_length(self):
@@ -99,7 +96,6 @@ class ThingSpeak:
     def remove_channel(id, user_api_key):
         body = {"api_key": user_api_key}
         req = Utils.make_request(method="DELETE", url=f"https://api.thingspeak.com/channels/{id}.json", json=body)
-
         return req
 
     # Method to create a channel

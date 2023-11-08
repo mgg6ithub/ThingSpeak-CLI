@@ -1,8 +1,11 @@
 from src.utils import Utils
 
 import time
+from progress.bar import IncrementalBar
+from tqdm import tqdm
 from src.thingspeak import ThingSpeak
 import psutil
+from tabulate import tabulate
 
 class Channel:
     def __init__(self, user_api_key, index, channel_dict):
@@ -10,35 +13,42 @@ class Channel:
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
-        # self.print_channel(self.index, self.channel_dict)
-        # self.channel_menu()
 
     def __str__(self):
         return
 
     # Method to print channels
-    def print_channel(self, index, channel_dict):
+    # def print_channel(self, index, channel_dict):
+    #     Utils.clear()
+        
+    #     Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
+    #                             [[f" Channel {index} ", channel_dict['name'],
+    #                             channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
+    #     # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
+    #     #                         [[channel_dict['latitude'], channel_dict['longitude'],
+    #     #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
+    #     # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
+    #     #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+        
+    #     # Check fields of the channels  
+    #     fields_of_channel = self.view_channel_fields()
+        
+
+    # Channel options
+    def channel_menu(self, index, channel_dict):
         Utils.clear()
         
+        fields_of_channel = self.view_channel_fields()
         Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
                                 [[f" Channel {index} ", channel_dict['name'],
                                 channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-        # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-        #                         [[channel_dict['latitude'], channel_dict['longitude'],
-        #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
-        # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-        #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
         
-        # Check fields of the channels  
-        fields_of_channel = self.view_channel_fields()
         if fields_of_channel is not None:
             field_index_list, field_index_names = fields_of_channel
             Utils.printFormatedTable(field_index_list, [field_index_names])
-        else:
-            return
+        # else:
+        #     return 'b'
 
-    # Channel options
-    def channel_menu(self):
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                             "------------------\n\n" \
                             "1 -- Modificar canal\n\n" \
@@ -57,15 +67,34 @@ class Channel:
 
         if option.__eq__("1"):
 
-            modify_state = self.update_channels_information()
-            while not modify_state:
-                print("Has introducido mal algun campo")
-                Utils.wait(2)
-                modify_state = self.update_channels_information()
+            self.update_channels_information()
+            # while not modify_state:
+            #     print("Has introducido mal algun campo")
+            #     Utils.wait(2)
+            #     modify_state = self.update_channels_information()
 
         elif option.__eq__("2"):
+            bar = IncrementalBar('Uploading data', max=100)
+            for i in range(1,100):
+                time.sleep(0.2)
+                bar.next()
+            bar.finish()
 
-            self.view_channel_fields()
+            total_iterations = 100
+
+            # Crea una barra de progreso
+            progress_bar = tqdm(total=total_iterations)
+
+            # Itera a través de las tareas
+            for i in range(total_iterations):
+                # Simula una tarea que toma un tiempo
+                time.sleep(0.5)  # Espera medio segundo
+
+                # Actualiza la barra de progreso
+                progress_bar.update(1)
+
+            # Cierra la barra de progreso
+            progress_bar.close()
 
         elif option.__eq__("3"):
 
@@ -75,8 +104,7 @@ class Channel:
                 if req.status_code == 200:
                     print("Channel successfully deleted!")
                     Utils.wait(2)
-                    return
-                    # self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
+                    return 'delete'
 
         elif option.__eq__("4"):
 
@@ -100,8 +128,7 @@ class Channel:
 
     # Method to update channel fields
     def update_channels_information(self):
-
-        self.print_channel(self.index, self.channel_dict)
+        Utils.clear()
 
         valid_fields_to_modify = [
             "latitude",
@@ -112,38 +139,72 @@ class Channel:
             "name",
             "public_flag",
             "tags",
-            "url"
+            "url",
+            "field1",
+            "field2",
+            "field3",
+            "field4",
+            "field5",
+            "field6",
+            "field7",
+            "field8"
         ]
 
-        print("name: " + self.channel_dict['name'])
-        print("public_flag: " + str(self.channel_dict['public_flag']))
-        print("description: " + self.channel_dict['description'])
+        data = {
+            "name": "TEMPERATURA",
+            "description": "nueva descripcion",
+        }
+
+        fields = self.view_channel_fields()
+
+        if fields:
+            fields_index, fields_name = fields
+            for f, n in zip(fields_index, fields_name):
+                data[f] = n
+        
+        data['metadata'] =  self.channel_dict['metadata']
+
+        tags = ', '.join(self.channel_dict['tags'])
+        data['tags'] = tags
+
         url = self.channel_dict['url']
         if url:
-            print("url: " + url)
+            data['url'] = url
         else:
-            print("url: ")
-        print("latitude: " + self.channel_dict['latitude'])
-        print("longitude: " + self.channel_dict['longitude'])
-        print("elevation: " + self.channel_dict['elevation'])
-        print("metadata: " + self.channel_dict['metadata'])
-        tags = ', '.join(self.channel_dict['tags'])
-        print("tags: " + tags)
+            data['url'] = ""
+        
+        url_github = self.channel_dict['github_url']
+        if url_github:
+            data['url_github'] = url_github
+        else:
+            data['url_github'] = ""
+        
+        data['elevation'] = self.channel_dict['elevation']
+        data['latitude'] = self.channel_dict['latitude']
+        data['longitude'] = self.channel_dict['longitude']
+        data['public_flag'] = self.channel_dict['public_flag']    
+
+        # Crear una lista de pares (clave, valor) para tabular
+        table_data = [(key, value) for key, value in data.items()]
+
+        # Utilizar tabulate para mostrar la información en una tabla
+        table = tabulate(table_data, tablefmt="rounded_grid")
+
+        print(table)
 
         updated_information = {"api_key": self.user_api_key}
-        str_modify_message = "Modify the values of your channel.\n" \
-                            "Example" \
+        str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
         i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
 
         if i.__eq__("b"):
-            return "b"
+            return
 
         entries = i.split(",")
 
         for entry in entries:
-            key, value = entry.split(":")
+            key, value = entry.split(":", 1)
             key = key.strip()  # Asegúrate de que no haya espacios en blanco
             value = value.strip()  # Asegúrate de que no haya espacios en blanco
 
@@ -156,9 +217,8 @@ class Channel:
 
         if req.status_code == 200:
             self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-            return True
-
-        return False  # Maneja casos en los que la solicitud no fue exitosa
+            print("Canal actualizado")
+            Utils.wait(2)
 
     # Method to view the fields of the channel
     def view_channel_fields(self):
@@ -226,8 +286,7 @@ class Channel:
             time.sleep(0.5)
             Utils.make_request(method="post", url="https://api.thingspeak.com/update.json", json={
                 "api_key": self.channel_dict['api_keys'][0]['api_key'],
-                "field1": cpu,
-                "field2": ram
+                "field1": cpu
             })
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos

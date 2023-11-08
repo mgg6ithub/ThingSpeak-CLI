@@ -71,9 +71,10 @@ def menu_principal(user_api_key):
         if ts.hayCanales:
             str_banner = "1 -- Ver canales públicos.\n\n" \
                         "2 -- Ver canales privados.\n\n" \
-                        "3 -- Ver todos los canales\n\n"
+                        "3 -- Ver todos los canales.\n\n" \
+                        "4 -- Create a new channel.\n\n" \
 
-            option = Utils.endless_terminal(str_banner, "1", "2", "3")
+            option = Utils.endless_terminal(str_banner, "1", "2", "3", "4")
 
             if option.__eq__("b"):
                 keyboard.press_and_release('ctrl+c')
@@ -82,8 +83,14 @@ def menu_principal(user_api_key):
                 indexes = ts.print_channel_index(ts.public_channels)
             elif option == "2":
                 indexes = ts.print_channel_index(ts.private_channels)
-            else:
+                # print(indexes)
+                # input()
+            elif option == "3":
                 indexes = ts.print_channel_index(ts.all_channels)
+            elif option == "4":
+                ts.create_channel(user_api_key)
+                ts.get_account_info()
+                continue
 
             i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
 
@@ -91,20 +98,21 @@ def menu_principal(user_api_key):
                 continue
 
             c = Channel(user_api_key, i, indexes[i])
-            
             while True:
-                c.print_channel(c.index, c.channel_dict)
-                o = c.channel_menu()
-                if o.__eq__('b'):
+                o = c.channel_menu(c.index, c.channel_dict)
+                if o == 'b':
                     break
-
+                elif o == 'delete':
+                    print("SE EJECUTAD")
+                    input()
+                    ts.get_account_info()
+                    break
         else:
             i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
                                 tty=False)
             if i.__eq__("y"):
                 ts.create_channel(user_api_key)
-            else:
-                pass
+                ts.get_account_info()
 
 
 if __name__ == '__main__':
