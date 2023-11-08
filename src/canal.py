@@ -19,21 +19,20 @@ class Channel:
     # Method to print channels
     def print_channel(self, index, channel_dict):
         Utils.clear()
-
+        
+        Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
+                                [[f" Channel {index} ", channel_dict['name'],
+                                channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
+        # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
+        #                         [[channel_dict['latitude'], channel_dict['longitude'],
+        #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
+        # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
+        #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+        
+        # Check fields of the channels  
         fields_of_channel = self.view_channel_fields()
-
         if fields_of_channel is not None:
             field_index_list, field_index_names = fields_of_channel
-
-            Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-                                    [[f" Channel {index} ", channel_dict['name'],
-                                    channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-            # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-            #                         [[channel_dict['latitude'], channel_dict['longitude'],
-            #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
-            # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-            #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
-
             Utils.printFormatedTable(field_index_list, [field_index_names])
         else:
             return
@@ -116,10 +115,24 @@ class Channel:
             "url"
         ]
 
+        print("name: " + self.channel_dict['name'])
+        print("public_flag: " + str(self.channel_dict['public_flag']))
+        print("description: " + self.channel_dict['description'])
+        url = self.channel_dict['url']
+        if url:
+            print("url: " + url)
+        else:
+            print("url: ")
+        print("latitude: " + self.channel_dict['latitude'])
+        print("longitude: " + self.channel_dict['longitude'])
+        print("elevation: " + self.channel_dict['elevation'])
+        print("metadata: " + self.channel_dict['metadata'])
+        tags = ', '.join(self.channel_dict['tags'])
+        print("tags: " + tags)
+
         updated_information = {"api_key": self.user_api_key}
         str_modify_message = "Modify the values of your channel.\n" \
-                            "Examples\n" \
-                            "ts> name:NEW CHANNEL NAME\n" \
+                            "Example" \
                             "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
         i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
