@@ -60,41 +60,51 @@ def login():
                 Utils.wait_animation(1)
         i = input()
 
+def channel_overall_selector():
+    pass
 
 # ThingSpeak menu Method
 def menu_principal(user_api_key):
     ts = ThingSpeak(user_api_key)
 
-    if ts.hayCanales:
+    while True:
+        if ts.hayCanales:
+            str_banner = "1 -- Ver canales públicos.\n\n" \
+                        "2 -- Ver canales privados.\n\n" \
+                        "3 -- Ver todos los canales\n\n"
 
-        str_banner = "1 -- Ver canales públicos.\n\n" \
-                    "2 -- Ver canales privados.\n\n" \
-                    "3 -- Ver todos los canales\n\n"
+            option = Utils.endless_terminal(str_banner, "1", "2", "3")
 
-        option = Utils.endless_terminal(str_banner, "1", "2", "3")
+            if option.__eq__("b"):
+                keyboard.press_and_release('ctrl+c')
 
-        if option.__eq__("b"):
-            keyboard.press_and_release('ctrl+c')
+            if option == "1":
+                indexes = ts.print_channel_index(ts.public_channels)
+            elif option == "2":
+                indexes = ts.print_channel_index(ts.private_channels)
+            else:
+                indexes = ts.print_channel_index(ts.all_channels)
 
-        if option == "1":
-            indexes = ts.print_channel_index(ts.public_channels)
-        elif option == "2":
-            indexes = ts.print_channel_index(ts.private_channels)
+            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
+
+            if i.__eq__('b'):
+                continue
+
+            c = Channel(user_api_key, i, indexes[i])
+            
+            while True:
+                c.print_channel(c.index, c.channel_dict)
+                o = c.channel_menu()
+                if o.__eq__('b'):
+                    break
+
         else:
-            indexes = ts.print_channel_index(ts.all_channels)
-
-        i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
-
-        Channel(user_api_key, i, indexes[i])
-
-    else:
-        i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
-                            tty=False)
-        if i.__eq__("y"):
-            ts.create_channel(user_api_key)
-        else:
-            pass
-    menu_principal(user_api_key)
+            i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
+                                tty=False)
+            if i.__eq__("y"):
+                ts.create_channel(user_api_key)
+            else:
+                pass
 
 
 if __name__ == '__main__':

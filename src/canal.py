@@ -10,8 +10,8 @@ class Channel:
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
-        self.print_channel(self.index, self.channel_dict)
-        self.channel_menu()
+        # self.print_channel(self.index, self.channel_dict)
+        # self.channel_menu()
 
     def __str__(self):
         return
@@ -28,11 +28,11 @@ class Channel:
             Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
                                     [[f" Channel {index} ", channel_dict['name'],
                                     channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-            Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-                                    [[channel_dict['latitude'], channel_dict['longitude'],
-                                    channel_dict['elevation'], channel_dict['last_entry_id']]])
-            Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-                                    [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
+            # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
+            #                         [[channel_dict['latitude'], channel_dict['longitude'],
+            #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
+            # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
+            #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
 
             Utils.printFormatedTable(field_index_list, [field_index_names])
         else:
@@ -53,12 +53,10 @@ class Channel:
 
         option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
 
-        if option.__eq__("b"):
-            return
+        if option.__eq__('b'):
+            return 'b'
 
-        if option.__eq__("back"):
-            return
-        elif option.__eq__("1"):
+        if option.__eq__("1"):
 
             modify_state = self.update_channels_information()
             while not modify_state:
@@ -67,8 +65,11 @@ class Channel:
                 modify_state = self.update_channels_information()
 
         elif option.__eq__("2"):
+
             self.view_channel_fields()
+
         elif option.__eq__("3"):
+
             i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
             if i == "y":
                 req = ThingSpeak.remove_channel(self.id, self.user_api_key)
@@ -77,22 +78,26 @@ class Channel:
                     Utils.wait(2)
                     return
                     # self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
+
         elif option.__eq__("4"):
+
             self.create_fields_in_channel()
+
         elif option.__eq__("5"):
+
             self.remove_fields_from_channel()
+
         elif option.__eq__("6"):
+
             self.subir_datos()
+
         elif option.__eq__("7"):
+
             self.read_data("1")
             self.read_data("2")
-        Utils.clear()
-        input()
-        print("OK")
-        Utils.wait(2)
-        if self.print_channel(self.index, self.channel_dict) is None:
-            return
-        self.channel_menu()
+
+        # if self.print_channel(self.index, self.channel_dict) is None:
+        #     return
 
     # Method to update channel fields
     def update_channels_information(self):
@@ -120,7 +125,7 @@ class Channel:
         i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
 
         if i.__eq__("b"):
-            return True
+            return "b"
 
         entries = i.split(",")
 

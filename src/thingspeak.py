@@ -1,6 +1,5 @@
 from src.utils import Utils
 
-
 class ThingSpeak:
     def __init__(self, user_apy_key):
         self.user_apy_key = user_apy_key
