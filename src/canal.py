@@ -6,6 +6,7 @@ from tqdm import tqdm
 from src.thingspeak import ThingSpeak
 import psutil
 from tabulate import tabulate
+import re
 
 class Channel:
     def __init__(self, user_api_key, index, channel_dict):
@@ -51,8 +52,8 @@ class Channel:
 
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                             "------------------\n\n" \
-                            "1 -- Modificar canal\n\n" \
-                            "2 -- See channel fields\n\n" \
+                            "1 -- Channel settings\n\n" \
+                            "2 -- Channel fields\n\n" \
                             "3 -- Delete the channel.\n\n" \
                             "4 -- Create fields for uploading data.\n\n" \
                             "5 -- Delete fields from channel.\n\n" \
@@ -60,7 +61,7 @@ class Channel:
                             "7 -- Read field data.\n\n" \
                             "Enter \"back\" to go backwards"
 
-        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7", c="c")
+        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7")
 
         if option.__eq__('b'):
             return 'b'
@@ -74,27 +75,28 @@ class Channel:
             #     modify_state = self.update_channels_information()
 
         elif option.__eq__("2"):
-            bar = IncrementalBar('Uploading data', max=100)
-            for i in range(1,100):
-                time.sleep(0.2)
-                bar.next()
-            bar.finish()
+            # bar = IncrementalBar('Uploading data', max=100)
+            # for i in range(1,100):
+            #     time.sleep(0.2)
+            #     bar.next()
+            # bar.finish()
 
-            total_iterations = 100
+            # total_iterations = 100
 
-            # Crea una barra de progreso
-            progress_bar = tqdm(total=total_iterations)
+            # # Crea una barra de progreso
+            # progress_bar = tqdm(total=total_iterations)
 
-            # Itera a través de las tareas
-            for i in range(total_iterations):
-                # Simula una tarea que toma un tiempo
-                time.sleep(0.5)  # Espera medio segundo
+            # # Itera a través de las tareas
+            # for i in range(total_iterations):
+            #     # Simula una tarea que toma un tiempo
+            #     time.sleep(0.5)  # Espera medio segundo
 
-                # Actualiza la barra de progreso
-                progress_bar.update(1)
+            #     # Actualiza la barra de progreso
+            #     progress_bar.update(1)
 
-            # Cierra la barra de progreso
-            progress_bar.close()
+            # # Cierra la barra de progreso
+            # progress_bar.close()
+            self.print_channel_fields()
 
         elif option.__eq__("3"):
 
@@ -151,17 +153,10 @@ class Channel:
         ]
 
         data = {
-            "name": "TEMPERATURA",
-            "description": "nueva descripcion",
+            "name": self.channel_dict['name'],
+            "description": self.channel_dict['description'],
         }
 
-        fields = self.view_channel_fields()
-
-        if fields:
-            fields_index, fields_name = fields
-            for f, n in zip(fields_index, fields_name):
-                data[f] = n
-        
         data['metadata'] =  self.channel_dict['metadata']
 
         tags = ', '.join(self.channel_dict['tags'])
@@ -196,7 +191,7 @@ class Channel:
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,description:This is the new description"
 
-        i = Utils.endless_terminal(str_modify_message, c="n", exit=True)
+        i = Utils.endless_terminal(str_modify_message, exit=True)
 
         if i.__eq__("b"):
             return
@@ -219,6 +214,26 @@ class Channel:
             self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
             print("Canal actualizado")
             Utils.wait(2)
+    
+    def print_channel_fields(self):
+        Utils.clear()
+        data = {}
+        fields = self.view_channel_fields()
+
+        if fields:
+            fields_index, fields_name = fields
+            for f, n in zip(fields_index, fields_name):
+                data[f] = n
+        table_data = [(key, value) for key, value in data.items()]
+        table = tabulate(table_data, tablefmt="rounded_grid")
+
+        option = Utils.endless_terminal(table, *fields_index)
+
+        if option == 'b':
+            return
+
+        index = re.findall("\d", option)[0]
+        self.read_data(index)
 
     # Method to view the fields of the channel
     def view_channel_fields(self):
@@ -306,6 +321,22 @@ class Channel:
         url_read_data_field = f"https://api.thingspeak.com/channels/{self.id}/fields/{field_id}.json?results=100&api_key={self.channel_dict['api_keys'][1]['api_key']}"
         req = Utils.make_request(method="GET", url=url_read_data_field)
 
-        print(req.status_code)
-        print(req.json()['feeds'])
-        input()
+        if req.status_code == 200:
+            field_values = req.json()['feeds']
+            
+            field_entries = []
+            cont = 1
+            for entri in field_values:
+                e = []
+                e.append(cont)
+                datetime = Utils.format_date(entri['created_at'])
+                date, time = datetime.split(" ")
+                e.append(date)
+                e.append(time)
+                e.append(entri[f'field{field_id}'])
+                field_entries.append(e)
+                cont += 1
+
+            table = tabulate(field_entries, tablefmt="rounded_grid")
+
+            Utils.endless_terminal(table, "1", clear="yes")

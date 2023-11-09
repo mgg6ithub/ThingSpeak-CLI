@@ -74,7 +74,7 @@ def menu_principal(user_api_key):
                         "3 -- Ver todos los canales.\n\n" \
                         "4 -- Create a new channel.\n\n" \
 
-            option = Utils.endless_terminal(str_banner, "1", "2", "3", "4")
+            option = Utils.endless_terminal(str_banner, "1", "2", "3", "4", clear="yes")
 
             if option.__eq__("b"):
                 keyboard.press_and_release('ctrl+c')
@@ -92,7 +92,7 @@ def menu_principal(user_api_key):
                 ts.get_account_info()
                 continue
 
-            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys(), c="c")
+            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys())
 
             if i.__eq__('b'):
                 continue
@@ -103,8 +103,6 @@ def menu_principal(user_api_key):
                 if o == 'b':
                     break
                 elif o == 'delete':
-                    print("SE EJECUTAD")
-                    input()
                     ts.get_account_info()
                     break
         else:

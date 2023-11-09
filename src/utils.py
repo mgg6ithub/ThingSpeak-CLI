@@ -59,9 +59,9 @@ class Utils:
 
     @staticmethod
     # Endless ThingSpeak -CLI terminal
-    def endless_terminal(message, *options, c=None, exit=False, tty=True):
+    def endless_terminal(message, *options, clear=None, exit=False, tty=True):
 
-        if c is None:
+        if clear is not None:
             Utils.clear()
 
         if not tty:
