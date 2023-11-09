@@ -1,0 +1,122 @@
+from src.utils import Utils
+
+import time
+import psutil
+from tabulate import tabulate
+
+# 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:49:27Z', 'entry_id': 3, 'field1': '0.4', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:49:43Z', 'entry_id': 4, 'field1': '0.3', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:49:59Z', 'entry_id': 5, 'field1': '0.2', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:50:14Z', 'entry_id': 6, 'field1': '0.2', 'field2': None}, 
+#            {'created_at': '2023-11-08T22:50:30Z', 'entry_id': 7, 'field1': '0.2', 'field2': None}, 
+#            {'created_at': '2023-11-09T16:13:33Z', 'entry_id': 8, 'field1': None, 'field2': '0.1'}, 
+#            {'created_at': '2023-11-09T16:13:49Z', 'entry_id': 9, 'field1': None, 'field2': '0.3'}, 
+#            {'created_at': '2023-11-09T16:14:04Z', 'entry_id': 10, 'field1': None, 'field2': '0.2'}, 
+#            {'created_at': '2023-11-09T16:14:20Z', 'entry_id': 11, 'field1': None, 'field2': '0.3'}, 
+#            {'created_at': '2023-11-09T16:14:35Z', 'entry_id': 12, 'field1': None, 'field2': '0.4'}, 
+#            {'created_at': '2023-11-09T16:14:51Z', 'entry_id': 13, 'field1': None, 'field2': '0.2'}, 
+#            {'created_at': '2023-11-09T16:15:06Z', 'entry_id': 14, 'field1': None, 'field2': '0.2'}]}
+
+class Field:
+
+    def __init__(self, field_index, channel_id, write_key, read_key):
+        self.field_index = field_index
+        self.channel_id = channel_id
+        self.write_key = write_key
+        self.read_key = read_key
+    
+    def update_date(self, index, name, data):
+        self.index = index
+
+    # Method to read data from a especific field
+    def read_data_from_field(self):
+        url_read_data_field = f"https://api.thingspeak.com/channels/{self.channel_id}/fields/{self.field_index}.json?results=100&api_key={self.read_key}"
+        req = Utils.make_request(method="GET", url=url_read_data_field)
+
+        if req.status_code == 200:
+            field_values = req.json()['feeds']
+            
+            field_entries = []
+            cont = 1
+            for entri in field_values:
+                e = []
+                e.append(cont)
+                datetime = Utils.format_date(entri['created_at'])
+                date, time = datetime.split(" ")
+                e.append(date)
+                e.append(time)
+                e.append(entri[f'field{self.field_index}'])
+                field_entries.append(e)
+                cont += 1
+
+            table = tabulate(field_entries, tablefmt="rounded_grid")
+            Utils.endless_terminal(table, "1", clear="yes")
+    
+
+    # Method to create fields
+    def create_field():
+        pass
+
+    # Method to remove the fields froma a channel
+    def remove_fields_from_channel(self):
+
+        fichero_json = {"api_key": self.user_api_key}
+
+        for ite in range(1, 9):
+            fichero_json[f"field{ite}"] = ""
+        r = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
+                            json=fichero_json)
+        print(r.status_code)
+        if r.status_code == 200:
+            print("Fields have been deleted")
+            time.sleep(2)
+
+    def subir_datos(self):
+        i = 0
+        while i < 100:
+            cpu = psutil.cpu_percent()  # USO DE LA CPU
+            vm = psutil.virtual_memory()
+            ram = vm.percent  # USO DE LA RAM
+
+            self.mostrar_recursos_hardware(cpu, ram, size=30)
+            i += 1
+            time.sleep(0.5)
+            Utils.make_request(method="post", url="https://api.thingspeak.com/update.json", json={
+                "api_key": self.channel_dict['api_keys'][0]['api_key'],
+                "field2": cpu
+            })
+
+    # GRAFICO TIMIDO para que se vea algo al subir los datos
+    # Se podria implementar con un thread y meterle la actualizacion cada 2 segundos para que se vea mas real
+    def mostrar_recursos_hardware(self, cpu, ram, size=50):
+        cpu_p = (cpu / 100.0)
+        cpu_carga = ">" * int(cpu_p * size) + "-" * (size - int(cpu_p * size))
+
+        ram_p = (ram / 100.0)
+        ram_carga = ">" * int(ram_p * size) + "-" * (size - int(ram_p * size))
+
+        print(f"\rUSO DE LA CPU: |{cpu_carga}| {cpu:.2f}%", end="")
+        print(f"\tUSO DE LA RAM: |{ram_carga}| {ram:.2f}%", end="\r")
+        # bar = IncrementalBar('Uploading data', max=100)
+            # for i in range(1,100):
+            #     time.sleep(0.2)
+            #     bar.next()
+            # bar.finish()
+
+            # total_iterations = 100
+
+            # # Crea una barra de progreso
+            # progress_bar = tqdm(total=total_iterations)
+
+            # # Itera a través de las tareas
+            # for i in range(total_iterations):
+            #     # Simula una tarea que toma un tiempo
+            #     time.sleep(0.5)  # Espera medio segundo
+
+            #     # Actualiza la barra de progreso
+            #     progress_bar.update(1)
+
+            # # Cierra la barra de progreso
+            # progress_bar.close()

@@ -1,6 +1,7 @@
 from src.thingspeak import ThingSpeak
 from src.utils import Utils
 from src.canal import Channel
+from src.field import Field
 
 import keyboard
 from colorama import Fore, init
@@ -8,6 +9,7 @@ import signal
 import sys
 import os
 import pdb
+import re
 
 # u = Utils()
 init()
@@ -60,11 +62,34 @@ def login():
                 Utils.wait_animation(1)
         i = input()
 
-def channel_overall_selector():
-    pass
+def field_menu(ts, channel, option):
+    # Obtiene el index del field. Por ejemplo si se escoge el field1 obtiene 1.
+    index = re.findall("\d", option)[0]
+
+    field = Field(index, channel.id, channel.write_api_key, channel.read_api_key)
+    field.read_data_from_field()
+
+def channel_menu(ts, user_api_key, i, indexes):
+    channel = Channel(user_api_key, i, indexes[i])
+    pattern = re.compile(r"field[1-8]$")
+    while True:
+        option = channel.channel_menu(channel.index, channel.channel_dict)
+        if option == 'b':
+            break
+        elif option == '2':
+            while True:
+                field_option = channel.print_channel_fields()
+
+                if field_option == 'b':
+                    break
+                if pattern.match(str(field_option)):
+                    field_menu(ts, channel, field_option)
+        elif option == 'delete':
+            ts.get_account_info()
+            break
 
 # ThingSpeak menu Method
-def menu_principal(user_api_key):
+def main_menu(user_api_key):
     ts = ThingSpeak(user_api_key)
 
     while True:
@@ -96,15 +121,8 @@ def menu_principal(user_api_key):
 
             if i.__eq__('b'):
                 continue
-
-            c = Channel(user_api_key, i, indexes[i])
-            while True:
-                o = c.channel_menu(c.index, c.channel_dict)
-                if o == 'b':
-                    break
-                elif o == 'delete':
-                    ts.get_account_info()
-                    break
+            
+            channel_menu(ts, user_api_key, i, indexes)
         else:
             i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
                                 tty=False)
@@ -114,4 +132,4 @@ def menu_principal(user_api_key):
 
 
 if __name__ == '__main__':
-    menu_principal("0WX1WIYR7G3QMKUR")
+    main_menu("0WX1WIYR7G3QMKUR")

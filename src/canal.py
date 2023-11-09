@@ -8,12 +8,18 @@ import psutil
 from tabulate import tabulate
 import re
 
+# {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
+#              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
+#              'created_at': '2023-11-08T22:47:43Z', 'updated_at': '2023-11-09T08:32:15Z', 'last_entry_id': 14}, 
+
 class Channel:
     def __init__(self, user_api_key, index, channel_dict):
         self.user_api_key = user_api_key
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
+        self.write_api_key = channel_dict['api_keys'][0]['api_key']
+        self.read_api_key = channel_dict['api_keys'][1]['api_key']
 
     def __str__(self):
         return
@@ -38,17 +44,10 @@ class Channel:
     # Channel options
     def channel_menu(self, index, channel_dict):
         Utils.clear()
-        
-        fields_of_channel = self.view_channel_fields()
+
         Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
                                 [[f" Channel {index} ", channel_dict['name'],
                                 channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-        
-        if fields_of_channel is not None:
-            field_index_list, field_index_names = fields_of_channel
-            Utils.printFormatedTable(field_index_list, [field_index_names])
-        # else:
-        #     return 'b'
 
         str_channel_banner = "OPCIONES DEL CANAL\n" \
                             "------------------\n\n" \
@@ -67,39 +66,11 @@ class Channel:
             return 'b'
 
         if option.__eq__("1"):
-
             self.update_channels_information()
-            # while not modify_state:
-            #     print("Has introducido mal algun campo")
-            #     Utils.wait(2)
-            #     modify_state = self.update_channels_information()
 
         elif option.__eq__("2"):
-            # bar = IncrementalBar('Uploading data', max=100)
-            # for i in range(1,100):
-            #     time.sleep(0.2)
-            #     bar.next()
-            # bar.finish()
-
-            # total_iterations = 100
-
-            # # Crea una barra de progreso
-            # progress_bar = tqdm(total=total_iterations)
-
-            # # Itera a través de las tareas
-            # for i in range(total_iterations):
-            #     # Simula una tarea que toma un tiempo
-            #     time.sleep(0.5)  # Espera medio segundo
-
-            #     # Actualiza la barra de progreso
-            #     progress_bar.update(1)
-
-            # # Cierra la barra de progreso
-            # progress_bar.close()
-            self.print_channel_fields()
-
+            return '2'
         elif option.__eq__("3"):
-
             i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
             if i == "y":
                 req = ThingSpeak.remove_channel(self.id, self.user_api_key)
@@ -109,28 +80,31 @@ class Channel:
                     return 'delete'
 
         elif option.__eq__("4"):
-
             self.create_fields_in_channel()
 
         elif option.__eq__("5"):
-
             self.remove_fields_from_channel()
 
         elif option.__eq__("6"):
-
             self.subir_datos()
 
         elif option.__eq__("7"):
-
             self.read_data("1")
             self.read_data("2")
-
-        # if self.print_channel(self.index, self.channel_dict) is None:
-        #     return
 
     # Method to update channel fields
     def update_channels_information(self):
         Utils.clear()
+
+        # print(self.channel_dict)
+        # input()
+        
+        # VALORES QUE NO SE PUEDEN CAMBIAR
+        # channel id
+        # create_at
+        # Last entry
+        # rankig (Porcentaje completado del canal)
+        # license_id
 
         valid_fields_to_modify = [
             "latitude",
@@ -142,25 +116,14 @@ class Channel:
             "public_flag",
             "tags",
             "url",
-            "field1",
-            "field2",
-            "field3",
-            "field4",
-            "field5",
-            "field6",
-            "field7",
-            "field8"
         ]
 
         data = {
             "name": self.channel_dict['name'],
             "description": self.channel_dict['description'],
+            "metadata": self.channel_dict['metadata'],
+            "tags": ' '.join(tag['name'] for tag in self.channel_dict['tags'])
         }
-
-        data['metadata'] =  self.channel_dict['metadata']
-
-        tags = ', '.join(self.channel_dict['tags'])
-        data['tags'] = tags
 
         url = self.channel_dict['url']
         if url:
@@ -215,28 +178,8 @@ class Channel:
             print("Canal actualizado")
             Utils.wait(2)
     
-    def print_channel_fields(self):
-        Utils.clear()
-        data = {}
-        fields = self.view_channel_fields()
-
-        if fields:
-            fields_index, fields_name = fields
-            for f, n in zip(fields_index, fields_name):
-                data[f] = n
-        table_data = [(key, value) for key, value in data.items()]
-        table = tabulate(table_data, tablefmt="rounded_grid")
-
-        option = Utils.endless_terminal(table, *fields_index)
-
-        if option == 'b':
-            return
-
-        index = re.findall("\d", option)[0]
-        self.read_data(index)
-
-    # Method to view the fields of the channel
-    def view_channel_fields(self):
+    # Method to get the fields of the channel
+    def get_channel_fields(self):
         req = ThingSpeak.get_channel_fields(self.id, self.channel_dict['api_keys'][1]['api_key'])
 
         if req.status_code == 200:
@@ -256,19 +199,26 @@ class Channel:
             else:
                 return None
 
-    # Method to remove the fields froma a channel
-    def remove_fields_from_channel(self):
+    # Method to print the fields of a channel
+    def print_channel_fields(self):
+        Utils.clear()
+        data = {}
+        fields = self.get_channel_fields()
 
-        fichero_json = {"api_key": self.user_api_key}
+        if fields:
+            fields_index, fields_name = fields
+            for f, n in zip(fields_index, fields_name):
+                data[f] = n
+        else:
+            if input("You have no fields. Do you want to create one? [y/n] ") == 'y':
+                self.create_field()
+            else:
+                return 'b'
+        
+        table_data = [(key, value) for key, value in data.items()]
+        table = tabulate(table_data, tablefmt="rounded_grid")
 
-        for ite in range(1, 9):
-            fichero_json[f"field{ite}"] = ""
-        r = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-                            json=fichero_json)
-        print(r.status_code)
-        if r.status_code == 200:
-            print("Fields have been deleted")
-            time.sleep(2)
+        return Utils.endless_terminal(table, *fields_index)
 
     # Method to create fields from a channel
     def create_fields_in_channel(self):
@@ -288,55 +238,3 @@ class Channel:
         if req.status_code == 200:
             print("New fields created.")
             time.sleep(2)
-
-    def subir_datos(self):
-        i = 0
-        while i < 100:
-            cpu = psutil.cpu_percent()  # USO DE LA CPU
-            vm = psutil.virtual_memory()
-            ram = vm.percent  # USO DE LA RAM
-
-            self.mostrar_recursos_hardware(cpu, ram, size=30)
-            i += 1
-            time.sleep(0.5)
-            Utils.make_request(method="post", url="https://api.thingspeak.com/update.json", json={
-                "api_key": self.channel_dict['api_keys'][0]['api_key'],
-                "field1": cpu
-            })
-
-    # GRAFICO TIMIDO para que se vea algo al subir los datos
-    # Se podria implementar con un thread y meterle la actualizacion cada 2 segundos para que se vea mas real
-    def mostrar_recursos_hardware(self, cpu, ram, size=50):
-        cpu_p = (cpu / 100.0)
-        cpu_carga = ">" * int(cpu_p * size) + "-" * (size - int(cpu_p * size))
-
-        ram_p = (ram / 100.0)
-        ram_carga = ">" * int(ram_p * size) + "-" * (size - int(ram_p * size))
-
-        print(f"\rUSO DE LA CPU: |{cpu_carga}| {cpu:.2f}%", end="")
-        print(f"\tUSO DE LA RAM: |{ram_carga}| {ram:.2f}%", end="\r")
-
-    # Method to read data from a especific field
-    def read_data(self, field_id):
-        url_read_data_field = f"https://api.thingspeak.com/channels/{self.id}/fields/{field_id}.json?results=100&api_key={self.channel_dict['api_keys'][1]['api_key']}"
-        req = Utils.make_request(method="GET", url=url_read_data_field)
-
-        if req.status_code == 200:
-            field_values = req.json()['feeds']
-            
-            field_entries = []
-            cont = 1
-            for entri in field_values:
-                e = []
-                e.append(cont)
-                datetime = Utils.format_date(entri['created_at'])
-                date, time = datetime.split(" ")
-                e.append(date)
-                e.append(time)
-                e.append(entri[f'field{field_id}'])
-                field_entries.append(e)
-                cont += 1
-
-            table = tabulate(field_entries, tablefmt="rounded_grid")
-
-            Utils.endless_terminal(table, "1", clear="yes")
