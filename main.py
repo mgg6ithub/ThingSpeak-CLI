@@ -7,13 +7,10 @@ import keyboard
 from colorama import Fore, init
 import signal
 import sys
-import os
-import pdb
 import re
 
 # u = Utils()
 init()
-
 
 # Method to handle the exit of the program when Ctrl + C is pressed
 def signal_handler(signum, frame):
@@ -26,7 +23,7 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-# Metodo para comprobar la clave ingresada
+# Method to check the user-api-token
 def checkUserApyKey(user_api_key):
     Utils.clear()
     init()
@@ -39,6 +36,7 @@ def checkUserApyKey(user_api_key):
         return False
 
 
+# Method to login
 def login():
     while True:
         Utils.clear()
@@ -62,16 +60,27 @@ def login():
                 Utils.wait_animation(1)
         i = input()
 
-def field_menu(ts, channel, option):
+
+# Method to control de flow of a selected field
+def field_menu(ts, channel, index):
     # Obtiene el index del field. Por ejemplo si se escoge el field1 obtiene 1.
-    index = re.findall("\d", option)[0]
+    # index = re.findall("\d", option)[0]
 
     field = Field(index, channel.id, channel.write_api_key, channel.read_api_key)
-    field.read_data_from_field()
+    table = field.read_data_from_field()
 
+    option = Utils.endless_terminal(table, "upload", clear="yes")
+
+    if option == 'upload':
+        field.subir_datos(index)
+
+
+# Method to control the flow of a selected channel
+# + Selecet a field
+# + Remove the channel
 def channel_menu(ts, user_api_key, i, indexes):
     channel = Channel(user_api_key, i, indexes[i])
-    pattern = re.compile(r"field[1-8]$")
+    pattern = re.compile(r"^[1-8]$")
     while True:
         option = channel.channel_menu(channel.index, channel.channel_dict)
         if option == 'b':
@@ -82,11 +91,12 @@ def channel_menu(ts, user_api_key, i, indexes):
 
                 if field_option == 'b':
                     break
-                if pattern.match(str(field_option)):
+                if pattern.match(field_option):
                     field_menu(ts, channel, field_option)
         elif option == 'delete':
             ts.get_account_info()
             break
+
 
 # ThingSpeak menu Method
 def main_menu(user_api_key):

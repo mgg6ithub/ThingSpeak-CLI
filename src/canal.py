@@ -1,12 +1,8 @@
 from src.utils import Utils
 
 import time
-from progress.bar import IncrementalBar
-from tqdm import tqdm
 from src.thingspeak import ThingSpeak
-import psutil
 from tabulate import tabulate
-import re
 
 # {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
 #              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
@@ -21,8 +17,6 @@ class Channel:
         self.write_api_key = channel_dict['api_keys'][0]['api_key']
         self.read_api_key = channel_dict['api_keys'][1]['api_key']
 
-    def __str__(self):
-        return
 
     # Method to print channels
     # def print_channel(self, index, channel_dict):
@@ -199,26 +193,34 @@ class Channel:
             else:
                 return None
 
+
     # Method to print the fields of a channel
     def print_channel_fields(self):
         Utils.clear()
-        data = {}
-        fields = self.get_channel_fields()
 
+        fields = self.get_channel_fields()
         if fields:
-            fields_index, fields_name = fields
-            for f, n in zip(fields_index, fields_name):
-                data[f] = n
+            fields_index, fields_names = fields
+
+            all_fields = []
+            cont = 1
+            for f in range(len(fields)):
+                temp = []
+                temp.append(str(cont))
+                temp.append(fields_index[f])
+                temp.append(fields_names[f])
+                all_fields.append(temp)
+                cont += 1
+            # Just getting the index of each field
+            valid_indexes = [all_fields[i][0] for i in range(len(all_fields))]
         else:
             if input("You have no fields. Do you want to create one? [y/n] ") == 'y':
                 self.create_field()
             else:
                 return 'b'
-        
-        table_data = [(key, value) for key, value in data.items()]
-        table = tabulate(table_data, tablefmt="rounded_grid")
 
-        return Utils.endless_terminal(table, *fields_index)
+        return Utils.endless_terminal(tabulate(all_fields, tablefmt="rounded_grid"), *valid_indexes)
+
 
     # Method to create fields from a channel
     def create_fields_in_channel(self):

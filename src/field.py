@@ -3,6 +3,8 @@ from src.utils import Utils
 import time
 import psutil
 from tabulate import tabulate
+from progress.bar import IncrementalBar
+from tqdm import tqdm
 
 # 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
 #            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
@@ -41,19 +43,19 @@ class Field:
             field_entries = []
             cont = 1
             for entri in field_values:
-                e = []
-                e.append(cont)
-                datetime = Utils.format_date(entri['created_at'])
-                date, time = datetime.split(" ")
-                e.append(date)
-                e.append(time)
-                e.append(entri[f'field{self.field_index}'])
-                field_entries.append(e)
-                cont += 1
+                value = entri[f'field{self.field_index}']
+                if value is not None:
+                    e = []
+                    e.append(cont)
+                    datetime = Utils.format_date(entri['created_at'])
+                    date, time = datetime.split(" ")
+                    e.append(date)
+                    e.append(time)
+                    e.append(value)
+                    field_entries.append(e)
+                    cont += 1
 
-            table = tabulate(field_entries, tablefmt="rounded_grid")
-            Utils.endless_terminal(table, "1", clear="yes")
-    
+            return tabulate(field_entries, tablefmt="rounded_grid")
 
     # Method to create fields
     def create_field():
@@ -73,7 +75,7 @@ class Field:
             print("Fields have been deleted")
             time.sleep(2)
 
-    def subir_datos(self):
+    def subir_datos(self, index):
         i = 0
         while i < 100:
             cpu = psutil.cpu_percent()  # USO DE LA CPU
@@ -84,8 +86,8 @@ class Field:
             i += 1
             time.sleep(0.5)
             Utils.make_request(method="post", url="https://api.thingspeak.com/update.json", json={
-                "api_key": self.channel_dict['api_keys'][0]['api_key'],
-                "field2": cpu
+                "api_key": self.write_key,
+                "field" + index: cpu
             })
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos

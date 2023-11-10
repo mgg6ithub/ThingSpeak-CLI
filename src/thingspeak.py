@@ -6,8 +6,6 @@ class ThingSpeak:
         self.hayCanales = False
         self.get_account_info()
 
-    # def __str__(self):
-    #     return str(self.all_channels)
 
     # Method to print the overall information of a channel
     # Name  Id
@@ -22,6 +20,7 @@ class ThingSpeak:
             indexes[str(cont)] = c
             cont += 1
         return indexes
+
 
     # Method to obtain all the channels from the logged account
     # {'id': 2299146, 'name': 'Canal1', 'description': 'Esta es la descripcion del canal 1',
@@ -56,9 +55,11 @@ class ThingSpeak:
         else:
             self.hayCanales = False
 
+
     # Method to know how many private and public channels there are
     def get_channels_length(self):
         return len(self.get_channels_list().json())
+
 
     # Method to get the list of all existing channels
     def get_channels_list(self):
@@ -66,9 +67,11 @@ class ThingSpeak:
                                 url=f"https://api.thingspeak.com/channels.json?api_key={self.user_apy_key}")
         return req
 
+
     # Method to know how many public channels are there
     def get_public_channels_length(self):
         return len(self.get_public_channels().json())
+
 
     # Method to get the list of all public channels
     def get_public_channels(self):
@@ -76,13 +79,16 @@ class ThingSpeak:
                                 url="https://api.thingspeak.com/users/mwa0000031155118/channels.json")
         return req
 
+
     # Method to obtain all private channels
     def get_private_channels(self):
         pass
 
+
     # Metodo para obtener los objetos json de los canales a partir de la lista
     def get_channels_json(self, list):
         pass
+
 
     @staticmethod
     # Method to retrieve the settings of a channel giving the id
@@ -91,12 +97,14 @@ class ThingSpeak:
                                 url=f"https://api.thingspeak.com/channels/{id}.json?api_key={user_api_key}")
         return req
 
+
     # Method to remove a channel
     @staticmethod
     def remove_channel(id, user_api_key):
         body = {"api_key": user_api_key}
         req = Utils.make_request(method="DELETE", url=f"https://api.thingspeak.com/channels/{id}.json", json=body)
         return req
+
 
     # Method to create a channel
     @staticmethod
@@ -118,11 +126,13 @@ class ThingSpeak:
 
         i = input()
 
+
     # Method to update information of the channel
     @staticmethod
     def update_channel_information(channel_id, updated_information):
         update_channel_information_url = f"https://api.thingspeak.com/channels/{channel_id}.json"
         return Utils.make_request(method="PUT", url=update_channel_information_url, json=updated_information)
+
 
     # Method to retrieve a channel fields
     @staticmethod
