@@ -57,23 +57,6 @@ class Field:
 
             return tabulate(field_entries, tablefmt="rounded_grid")
 
-    # Method to create fields
-    def create_field():
-        pass
-
-    # Method to remove the fields froma a channel
-    def remove_fields_from_channel(self):
-
-        fichero_json = {"api_key": self.user_api_key}
-
-        for ite in range(1, 9):
-            fichero_json[f"field{ite}"] = ""
-        r = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-                            json=fichero_json)
-        print(r.status_code)
-        if r.status_code == 200:
-            print("Fields have been deleted")
-            time.sleep(2)
 
     def subir_datos(self, index):
         i = 0

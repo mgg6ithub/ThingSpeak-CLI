@@ -139,3 +139,10 @@ class ThingSpeak:
     def get_channel_fields(channel_id, api_key):
         return Utils.make_request(method="GET",
                                 url=f"https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}")
+
+
+    # Method to create only one field
+    @staticmethod
+    def create_one_field_for_channel(new_field_name, channel_id):
+        return Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{channel_id}.json",
+                                json=new_field_name)
