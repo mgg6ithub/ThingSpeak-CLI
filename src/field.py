@@ -40,6 +40,8 @@ class Field:
         if req.status_code == 200:
             field_values = req.json()['feeds']
             
+            print(field_values)
+            input()
             field_entries = []
             cont = 1
             for entri in field_values:

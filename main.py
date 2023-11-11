@@ -96,25 +96,27 @@ def channel_menu(ts, user_api_key, i, indexes):
                 if o == 'refresh':
                     continue
 
-                field_menu_banner = channel.table_of_fields + "\n\n1 -- Select a field.\n\n" \
-                                    "2 -- Create a field.\n\n" \
-                                    "3 -- Detele a field.\n\n" \
-                                    "4 -- Delete all fields.\n\n"
-                field_menu_option = Utils.endless_terminal(field_menu_banner, "1", "2", "3", "4")
+                options_dict = {
+                    "create field": channel.create_one_field,
+                    "delete field": channel.delete_one_field,
+                    "delete all fields": channel.delete_all_fields,
+                    "help": channel.print_help
+                }
+
+                valid_options = list(options_dict.keys()) + channel.valid_indexes_with_fields
+
+                field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options)
 
                 if field_menu_option == 'b':
                     break
 
-                options_dict = {
-                    "1": channel.select_field,
-                    "2": channel.create_one_field,
-                    "3": channel.delete_one_field,
-                    "4": channel.delete_all_fields
-                }
+                # field has been selected
+                if pattern.match(field_menu_option):
+                    field_menu(ts, channel, field_menu_option)
 
-                selected_field = options_dict[field_menu_option]()
-                if selected_field and pattern.match(selected_field):
-                    field_menu(ts, channel, selected_field)
+                # option in field list has been selected (help, create field, delete field, ...)
+                if field_menu_option in options_dict:
+                    options_dict[field_menu_option]()
 
         elif option == 'delete':
             ts.get_account_info()

@@ -59,7 +59,7 @@ class Utils:
 
     @staticmethod
     # Endless ThingSpeak -CLI terminal
-    def endless_terminal(message, *options, clear=None, exit=False, tty=True):
+    def endless_terminal(message, *options, help=None, clear=None, exit=False, tty=True):
 
         if clear is not None:
             Utils.clear()
@@ -68,6 +68,9 @@ class Utils:
             return input(message)
 
         print(message)
+        if help:
+            print(help)
+
         while True:
             i = str(input(Fore.GREEN + "ts> " + Fore.WHITE))
             if i in options or i.__eq__("b") or exit:

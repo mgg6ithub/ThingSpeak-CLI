@@ -293,3 +293,18 @@ class Channel:
         if r.status_code == 200:
             print("Fields have been deleted")
             time.sleep(2)
+
+
+# Method to print commands help
+    def print_help(self):
+        # options_dict = {
+        #     "create field": channel.create_one_field,
+        #     "delete field": channel.delete_one_field,
+        #     "delete all fields": channel.delete_all_fields,
+        #     "help": channel.print_help
+        # }
+        str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
+                                                "delete field\tDelete a existing field.\n" \
+                                                "delete all fields\tDelete all existing field and their data."
+        print(str_field_list_commands_help)
+        input()
