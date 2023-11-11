@@ -5,6 +5,7 @@ import psutil
 from tabulate import tabulate
 from progress.bar import IncrementalBar
 from tqdm import tqdm
+import keyboard
 
 # 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
 #            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
@@ -28,9 +29,11 @@ class Field:
         self.channel_id = channel_id
         self.write_key = write_key
         self.read_key = read_key
-    
+
+
     def update_date(self, index, name, data):
         self.index = index
+
 
     # Method to read data from a especific field
     def read_data_from_field(self):
@@ -39,9 +42,7 @@ class Field:
 
         if req.status_code == 200:
             field_values = req.json()['feeds']
-            
-            print(field_values)
-            input()
+
             field_entries = []
             cont = 1
             for entri in field_values:
@@ -62,7 +63,10 @@ class Field:
 
     def subir_datos(self, index):
         i = 0
-        while i < 100:
+        # print("Press q to stop de upload.")
+        while i < 200:
+            # if keyboard.is_pressed('q'):
+            #     break
             cpu = psutil.cpu_percent()  # USO DE LA CPU
             vm = psutil.virtual_memory()
             ram = vm.percent  # USO DE LA RAM
@@ -74,6 +78,7 @@ class Field:
                 "api_key": self.write_key,
                 "field" + index: cpu
             })
+
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos
     # Se podria implementar con un thread y meterle la actualizacion cada 2 segundos para que se vea mas real
@@ -107,3 +112,22 @@ class Field:
 
             # # Cierra la barra de progreso
             # progress_bar.close()
+
+
+    # Method to download the data of a given field
+    # download filw formats
+    #   .xlsx
+    #   .cvs
+    #   .txt
+    def download_data():
+        pass
+
+
+    # Method to clear all the data of the field
+    def clear_field_data():
+        pass
+
+
+    # Method to delete the current field
+    def delet_field():
+        pass

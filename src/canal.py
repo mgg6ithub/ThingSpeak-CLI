@@ -200,7 +200,7 @@ class Channel:
                 cont += 1
 
             # Just getting the index of each field
-            self.valid_indexes_with_fields = [all_fields[i][0] for i in range(len(all_fields))]
+            self.valid_field_indexes = [all_fields[i][0] for i in range(len(all_fields))]
         else:
             if input("You have no fields. Do you want to create one? [y/n] ") == 'y':
                 self.create_one_field()
@@ -212,7 +212,7 @@ class Channel:
 
     #Method to select a field from the channel and create a new Field instance with it.
     def select_field(self):
-        return Utils.endless_terminal(self.table_of_fields + "\n\nSelect a field by its index.\n", *self.valid_indexes_with_fields)
+        return Utils.endless_terminal(self.table_of_fields + "\n\nSelect a field by its index.\n", *self.valid_field_indexes)
 
     # Method to create fields
     def create_one_field(self):
@@ -243,14 +243,27 @@ class Channel:
             print(f"New field {field_name} created.")
             time.sleep(2)
 
+    
+    # Method to clear all the data from a field
+    def clear_data_from_all_fields(self):
+        Utils.clear()
+        if input("Are you sure you want to delete the data from all fields? [y/n]") == 'y':
+            res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
+            if res.status_code == 200:
+                print("All the data from fields deleted.")
+                time.sleep(2)
+            else:
+                print(res.status_code)
+                input()
+
 
     # Method to delete one field
     def delete_one_field(self):
-        selected_index = Utils.endless_terminal(self.table_of_fields + "\n\nSelect the index of the field you want to delete.", *self.valid_indexes_with_fields)
+        selected_index = Utils.endless_terminal(self.table_of_fields + "\n\nSelect the index of the field you want to delete.", *self.valid_field_indexes)
 
         remove_field = {"api_key": self.user_api_key}
 
-        for i in self.valid_indexes_with_fields:
+        for i in self.valid_field_indexes:
             if i == selected_index:
                 remove_field['field' + i] = ""
         
@@ -304,6 +317,7 @@ class Channel:
         #     "help": channel.print_help
         # }
         str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
+                                                "clear fields\tClear all the data from all the fields.\n" \
                                                 "delete field\tDelete a existing field.\n" \
                                                 "delete all fields\tDelete all existing field and their data."
         print(str_field_list_commands_help)

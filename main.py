@@ -63,16 +63,24 @@ def login():
 
 # Method to control de flow of a selected field
 def field_menu(ts, channel, index):
-    # Obtiene el index del field. Por ejemplo si se escoge el field1 obtiene 1.
-    # index = re.findall("\d", option)[0]
 
     field = Field(index, channel.id, channel.write_api_key, channel.read_api_key)
     table = field.read_data_from_field()
 
-    option = Utils.endless_terminal(table, "upload", clear="yes")
+    while True:
+        options_dict = {
+            "upload": field.subir_datos(index),
+            "download data": field.download_data(index),
+            "clear field": field.clear_field(index),
+            "delete field": delete_field(index)
+        }
 
-    if option == 'upload':
-        field.subir_datos(index)
+        option = Utils.endless_terminal(table, *list(options_dict.keys()), clear="yes")
+
+        if option == 'b':
+            break
+
+
 
 
 # Method to control the flow of a selected channel
@@ -98,12 +106,13 @@ def channel_menu(ts, user_api_key, i, indexes):
 
                 options_dict = {
                     "create field": channel.create_one_field,
+                    "clear fields": channel.clear_data_from_all_fields,
                     "delete field": channel.delete_one_field,
                     "delete all fields": channel.delete_all_fields,
                     "help": channel.print_help
                 }
 
-                valid_options = list(options_dict.keys()) + channel.valid_indexes_with_fields
+                valid_options = list(options_dict.keys()) + channel.valid_field_indexes
 
                 field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options)
 

@@ -146,3 +146,12 @@ class ThingSpeak:
     def create_one_field_for_channel(new_field_name, channel_id):
         return Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{channel_id}.json",
                                 json=new_field_name)
+
+
+    # Method to clear all data from a given field
+    @staticmethod
+    def clear_data_from_all_fields(channel_id, api_key):
+        url_clear_field = f'https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}'
+        # params = {'api_key': write_api_key}
+
+        return Utils.make_request(method="DELETE", url=url_clear_field)
