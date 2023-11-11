@@ -67,20 +67,29 @@ def field_menu(ts, channel, index):
     field = Field(index, channel.id, channel.write_api_key, channel.read_api_key)
     table = field.read_data_from_field()
 
+    options_dict = {
+        "upload": field.subir_datos,
+        "download data": field.download_data,
+        "clear field": field.clear_field_data,
+        "delete field": field.delete_field
+    }
+    
     while True:
-        options_dict = {
-            "upload": field.subir_datos(index),
-            "download data": field.download_data(index),
-            "clear field": field.clear_field(index),
-            "delete field": delete_field(index)
-        }
-
         option = Utils.endless_terminal(table, *list(options_dict.keys()), clear="yes")
-
+    
         if option == 'b':
             break
 
+        options_dict[option]()
 
+    # input("HERE")
+    # while True:
+    #     
+    #     input("HERE")
+    #     option = Utils.endless_terminal(table, *list(options_dict.keys()), clear="yes")
+        
+    #     if option == 'b':
+    #         break
 
 
 # Method to control the flow of a selected channel

@@ -155,3 +155,10 @@ class ThingSpeak:
         # params = {'api_key': write_api_key}
 
         return Utils.make_request(method="DELETE", url=url_clear_field)
+    
+
+    # Method to make de http request to get the feeds of giving channel
+    @staticmethod
+    def get_feeds_from_field(channel_id, field_index, read_api_key):
+        url_read_data_field = f"https://api.thingspeak.com/channels/{channel_id}/fields/{field_index}.json?results=100&api_key={read_api_key}"
+        return Utils.make_request(method="GET", url=url_read_data_field)

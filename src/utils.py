@@ -5,6 +5,10 @@ import time
 import json
 from colorama import Fore
 from tabulate import tabulate
+from datetime import datetime
+import pdb
+import pandas as pd
+import openpyxl
 
 # Define la variable global
 clear_command = "cls" if platform.system() == "Windows" else "clear"
@@ -120,3 +124,39 @@ class Utils:
         ymd = date.split("T")[0]
         time = date.split("T")[1].split("Z")[0]
         return str(ymd) + " " + str(time)
+
+    #
+    # Methods to download data and create different file formats
+    #
+
+    # Method to create a simple .txt with the retrieved data
+    @staticmethod
+    def create_txt(file_name, data):
+        # pdb.set_trace()
+        store_path = os.getcwd() + "/" + file_name + ".txt"
+        str_to_write = str(datetime.now().date()) + "\n\n" + data
+        with open(store_path, "w") as file:
+            file.write(str_to_write)
+        print(f"{file_name}.txt created at {store_path}.")
+        time.sleep(3)
+    
+
+    # Method to create a xlsx file for excel
+    @staticmethod
+    def create_xlsx(file_name, data):
+        
+        store_path = os.getcwd() + "/" + file_name + ".xlsx"
+
+        try:
+            wb = openpyxl.load_workbook(store_path)
+        except FileNotFoundError:
+            wb = openpyxl.Workbook()
+        
+        ws = wb.active
+
+        ws.title = file_name
+
+        wb.save(file_name + ".xlsx")
+
+        print(f"{file_name}.xlsx created.")
+        time.sleep(3)

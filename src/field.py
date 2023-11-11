@@ -1,4 +1,5 @@
 from src.utils import Utils
+from src.thingspeak import ThingSpeak
 
 import time
 import psutil
@@ -34,34 +35,37 @@ class Field:
     def update_date(self, index, name, data):
         self.index = index
 
+    
+    # Method to get the feeds from a field
+    def get_data_from_field(self):
+        res = ThingSpeak.get_feeds_from_field(self.channel_id, self.field_index, self.read_key)
+        if res.status_code == 200:
+            return res.json()['feeds']
 
     # Method to read data from a especific field
     def read_data_from_field(self):
-        url_read_data_field = f"https://api.thingspeak.com/channels/{self.channel_id}/fields/{self.field_index}.json?results=100&api_key={self.read_key}"
-        req = Utils.make_request(method="GET", url=url_read_data_field)
+        
+        field_values = self.get_data_from_field()
 
-        if req.status_code == 200:
-            field_values = req.json()['feeds']
+        field_entries = []
+        cont = 1
+        for entri in field_values:
+            value = entri[f'field{self.field_index}']
+            if value is not None:
+                e = []
+                e.append(cont)
+                datetime = Utils.format_date(entri['created_at'])
+                date, time = datetime.split(" ")
+                e.append(date)
+                e.append(time)
+                e.append(value)
+                field_entries.append(e)
+                cont += 1
 
-            field_entries = []
-            cont = 1
-            for entri in field_values:
-                value = entri[f'field{self.field_index}']
-                if value is not None:
-                    e = []
-                    e.append(cont)
-                    datetime = Utils.format_date(entri['created_at'])
-                    date, time = datetime.split(" ")
-                    e.append(date)
-                    e.append(time)
-                    e.append(value)
-                    field_entries.append(e)
-                    cont += 1
-
-            return tabulate(field_entries, tablefmt="rounded_grid")
+        return tabulate(field_entries, tablefmt="rounded_grid")
 
 
-    def subir_datos(self, index):
+    def subir_datos(self):
         i = 0
         # print("Press q to stop de upload.")
         while i < 200:
@@ -76,7 +80,7 @@ class Field:
             time.sleep(0.5)
             Utils.make_request(method="post", url="https://api.thingspeak.com/update.json", json={
                 "api_key": self.write_key,
-                "field" + index: cpu
+                "field" + self.field_index: cpu
             })
 
 
@@ -119,8 +123,22 @@ class Field:
     #   .xlsx
     #   .cvs
     #   .txt
-    def download_data():
-        pass
+    def download_data(self):
+        file_name = str(input("Enter the file name: "))
+
+        format_options = {
+            "xlsx": Utils.create_xlsx,
+            "csv": "csv",
+            "txt": Utils.create_txt
+        }
+
+        str_banner_choose_format = "Choose file format for downloading the data.\n\n" \
+                                    "1 -- xlsx\n" \
+                                    "2 -- cvs\n" \
+                                    "3 -- txt\n"
+        selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
+
+        format_options[selected_option](file_name, self.read_data_from_field())
 
 
     # Method to clear all the data of the field
@@ -129,5 +147,5 @@ class Field:
 
 
     # Method to delete the current field
-    def delet_field():
+    def delete_field():
         pass
