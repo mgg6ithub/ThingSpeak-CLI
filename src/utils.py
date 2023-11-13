@@ -131,7 +131,7 @@ class Utils:
 
     # Method to create a simple .txt with the retrieved data
     @staticmethod
-    def create_txt(file_name, data):
+    def create_txt(file_name, data, field_index):
         # pdb.set_trace()
         store_path = os.getcwd() + "/" + file_name + ".txt"
         str_to_write = str(datetime.now().date()) + "\n\n" + data
@@ -139,24 +139,60 @@ class Utils:
             file.write(str_to_write)
         print(f"{file_name}.txt created at {store_path}.")
         time.sleep(3)
-    
+
+
+    # Method to create a simple .csv file with the field data
+    def create_csv(file_name, data, field_index):
+        store_path = os.getcwd() + "/" + file_name + ".csv"
+
+        with open(store_path, "w") as file:
+            file.write("\t" + "   PRUEBA\n")
+            file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
+            for row in data:
+                date, time = Utils.format_date(row['created_at']).split(" ")
+                file.write(date + "\t" + time + "\t" + row[f'field' + field_index] + "\n")
+        print(file_name + " created.")
+        Utils.wait(2)
+
+
+    # Method to create a row in a excel sheet with given data
+    def insert_row_in_sheet(ws, fila, datos):
+        if type(datos) is list:
+            # pdb.set_trace()
+            col = 1
+            for d in datos:
+                ws.cell(row=fila, column=col, value=d)
+                col += 1
+        else:
+            ws.cell(row=fila, column=1, value=datos)
+
 
     # Method to create a xlsx file for excel
     @staticmethod
-    def create_xlsx(file_name, data):
-        
+    def create_xlsx(file_name, data, field_index):
         store_path = os.getcwd() + "/" + file_name + ".xlsx"
 
         try:
             wb = openpyxl.load_workbook(store_path)
         except FileNotFoundError:
             wb = openpyxl.Workbook()
-        
-        ws = wb.active
 
+        ws = wb.active
         ws.title = file_name
+
+        ws.merge_cells('A1:C1')
+        ws['A1'] = "PRUEBA"
+        # Utils.introducir_fila_excel(ws, 1, "PRUEBA")
+        Utils.insert_row_in_sheet(ws, 2, ["Date", "Time", "Value"])
+
+        row = 3
+        for data_row in data:
+            datetime = Utils.format_date(data_row['created_at'])
+            date, time = datetime.split(" ")
+            Utils.insert_row_in_sheet(ws, row, [date, time, data_row[f'field' + field_index]])
+            row += 1
 
         wb.save(file_name + ".xlsx")
 
         print(f"{file_name}.xlsx created.")
-        time.sleep(3)
+        Utils.wait(2)

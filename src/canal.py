@@ -21,7 +21,7 @@ class Channel:
     # Method to print channels
     # def print_channel(self, index, channel_dict):
     #     Utils.clear()
-        
+
     #     Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
     #                             [[f" Channel {index} ", channel_dict['name'],
     #                             channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
@@ -30,10 +30,10 @@ class Channel:
     #     #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
     #     # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
     #     #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
-        
+
     #     # Check fields of the channels  
     #     fields_of_channel = self.view_channel_fields()
-        
+
 
     # Channel options
     def channel_menu(self, index, channel_dict):

@@ -128,17 +128,17 @@ class Field:
 
         format_options = {
             "xlsx": Utils.create_xlsx,
-            "csv": "csv",
+            "csv": Utils.create_csv,
             "txt": Utils.create_txt
         }
 
         str_banner_choose_format = "Choose file format for downloading the data.\n\n" \
                                     "1 -- xlsx\n" \
-                                    "2 -- cvs\n" \
+                                    "2 -- csv\n" \
                                     "3 -- txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
 
-        format_options[selected_option](file_name, self.read_data_from_field())
+        format_options[selected_option](file_name, self.get_data_from_field(), self.field_index)
 
 
     # Method to clear all the data of the field
