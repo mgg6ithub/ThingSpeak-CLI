@@ -3,6 +3,7 @@ from src.utils import Utils
 import time
 from src.thingspeak import ThingSpeak
 from tabulate import tabulate
+import pdb
 
 # {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
 #              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
@@ -174,13 +175,13 @@ class Channel:
                     fields_name.append(channel_data['channel'][field])
 
             if len(fields_index) > 0 and len(fields_name) > 0:
+                self.channel_fields_names = fields_name
                 return fields_index, fields_name
             else:
                 return None
 
 
     # Method to print the fields of a channel
-
     def print_channel_fields(self):
         Utils.clear()
 
@@ -209,6 +210,16 @@ class Channel:
                 return 'b'
 
         self.table_of_fields = tabulate(all_fields, tablefmt="rounded_grid")
+    
+    # Method to get the name of a field giving the correpondant index
+    def get_field_name(self, index):
+
+        if index is not 0:
+            index -= 1
+
+        for i in range(0, len(self.channel_fields_names)):
+            if i == index:
+                return self.channel_fields_names[i]
 
     #Method to select a field from the channel and create a new Field instance with it.
     def select_field(self):

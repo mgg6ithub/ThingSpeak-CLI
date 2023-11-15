@@ -25,8 +25,9 @@ import keyboard
 
 class Field:
 
-    def __init__(self, field_index, channel_id, write_key, read_key):
+    def __init__(self, field_index, field_name, channel_id, write_key, read_key):
         self.field_index = field_index
+        self.field_name = field_name
         self.channel_id = channel_id
         self.write_key = write_key
         self.read_key = read_key

@@ -3,7 +3,6 @@ from src.utils import Utils
 from src.canal import Channel
 from src.field import Field
 
-import keyboard
 from colorama import Fore, init
 import signal
 import sys
@@ -15,9 +14,7 @@ init()
 # Method to handle the exit of the program when Ctrl + C is pressed
 def signal_handler(signum=None, frame=None):
     Utils.clear()
-    print(Fore.RED + "Saliendo de TS")
-    Utils.wait_animation(1)
-    sys.exit(1)
+    sys.exit(0)
 
 
 signal.signal(signal.SIGINT, signal_handler)
@@ -62,8 +59,8 @@ def login():
 
 
 # Method to control de flow of a selected field
-def field_menu(ts, channel, index):
-    field = Field(index, channel.id, channel.write_api_key, channel.read_api_key)
+def field_menu(ts, channel, index, field_name):
+    field = Field(index, field_name, channel.id, channel.write_api_key, channel.read_api_key)
     table = field.read_data_from_field()
 
     str_field_menu_help = "rename\trename the field\n" \
@@ -80,7 +77,7 @@ def field_menu(ts, channel, index):
     }
     
     while True:
-        option = Utils.endless_terminal(table, *list(options_dict.keys()), help_message=str_field_menu_help, clear="yes")
+        option = Utils.endless_terminal(table, *list(options_dict.keys()), help_message=str_field_menu_help, menu=field_name, clear="yes")
     
         if option == 'b':
             break
@@ -107,6 +104,14 @@ def channel_menu(ts, user_api_key, i, indexes):
                                                 "clear fields\tClear all the data from all the fields.\n" \
                                                 "delete field\tDelete a existing field.\n" \
                                                 "delete all fields\tDelete all existing field and their data.\n"
+
+    options_dict = {
+                    "create field": channel.create_one_field,
+                    "clear fields": channel.clear_data_from_all_fields,
+                    "delete field": channel.delete_one_field,
+                    "delete all fields": channel.delete_all_fields
+                }
+
     while True:
         option = channel.channel_menu(channel.index, channel.channel_dict)
         if option == 'b':
@@ -122,13 +127,6 @@ def channel_menu(ts, user_api_key, i, indexes):
                 if o == 'refresh':
                     continue
 
-                options_dict = {
-                    "create field": channel.create_one_field,
-                    "clear fields": channel.clear_data_from_all_fields,
-                    "delete field": channel.delete_one_field,
-                    "delete all fields": channel.delete_all_fields
-                }
-
                 valid_options = list(options_dict.keys()) + channel.valid_field_indexes
                 
                 field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=str_field_list_commands_help)
@@ -138,7 +136,7 @@ def channel_menu(ts, user_api_key, i, indexes):
 
                 # field has been selected
                 if pattern.match(field_menu_option):
-                    field_menu(ts, channel, field_menu_option)
+                    field_menu(ts, channel, field_menu_option, channel.get_field_name(int(field_menu_option)))
 
                 # option in field list has been selected (help, create field, delete field, ...)
                 if field_menu_option in options_dict:
