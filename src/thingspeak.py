@@ -47,6 +47,7 @@ class ThingSpeak:
                     private_channels.append(c)
 
             self.len_all_channels = channel_number
+            self.channel_names = self.get_channel_names(channels)
             self.all_channels = channels
             self.len_public_channels = len(public_channels)
             self.public_channels = public_channels
@@ -54,6 +55,23 @@ class ThingSpeak:
             self.private_channels = private_channels
         else:
             self.hayCanales = False
+
+
+    # Method get all the channel names
+    def get_channel_names(self, channels_json):
+        channel_names = []
+        for i in channels_json:
+            channel_names.append(str(i['name']))
+        return channel_names
+
+
+    # Method to get the channel name giving the index
+    def get_channel_name(self, index):
+        if index is not 0:
+            index -= 1
+        for i in range(len(self.channel_names)):
+            if i == index:
+                return self.channel_names[i]
 
 
     # Method to know how many private and public channels there are

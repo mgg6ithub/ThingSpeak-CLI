@@ -11,14 +11,20 @@ import re
 # u = Utils()
 init()
 
-# Method to handle the exit of the program when Ctrl + C is pressed
+# Method to handle the exit of the program when ctrl + c is pressed
 def signal_handler(signum=None, frame=None):
-    Utils.clear()
-    sys.exit(0)
-
+    # ctrl + c
+    if signum == signal.SIGINT:
+        Utils.clear()
+        sys.exit(0)
+    # ctrl + l
+    # elif signum == signal.SIGINFO:
+    #     Utils.clear()
+    else:
+        sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-
+# signal.signal(signal.SIGINFO, signal_handler)
 
 # Method to check the user-api-token
 def checkUserApyKey(user_api_key):
@@ -77,7 +83,7 @@ def field_menu(ts, channel, index, field_name):
     }
     
     while True:
-        option = Utils.endless_terminal(table, *list(options_dict.keys()), help_message=str_field_menu_help, menu=field_name, clear="yes")
+        option = Utils.endless_terminal(table, *list(options_dict.keys()), help_message=str_field_menu_help, menu=channel.channel_name, menu1=field_name, clear="yes")
     
         if option == 'b':
             break
@@ -97,8 +103,8 @@ def field_menu(ts, channel, index, field_name):
 # Method to control the flow of a selected channel
 # + Selecet a field
 # + Remove the channel
-def channel_menu(ts, user_api_key, i, indexes):
-    channel = Channel(user_api_key, i, indexes[i])
+def channel_menu(ts, user_api_key, i, indexes, channel_name):
+    channel = Channel(user_api_key, i, indexes[i], channel_name)
     pattern = re.compile(r"^[1-8]$")
     str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
                                                 "clear fields\tClear all the data from all the fields.\n" \
@@ -114,6 +120,7 @@ def channel_menu(ts, user_api_key, i, indexes):
 
     while True:
         option = channel.channel_menu(channel.index, channel.channel_dict)
+
         if option == 'b':
             break
         elif option == '2':
@@ -128,8 +135,8 @@ def channel_menu(ts, user_api_key, i, indexes):
                     continue
 
                 valid_options = list(options_dict.keys()) + channel.valid_field_indexes
-                
-                field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=str_field_list_commands_help)
+
+                field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=str_field_list_commands_help, menu=channel.channel_name)
 
                 if field_menu_option == 'b':
                     break
@@ -174,12 +181,12 @@ def main_menu(user_api_key):
                 ts.get_account_info()
                 continue
 
-            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"back\" to go backwards.", *indexes.keys())
+            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"b\" to go backwards.", *indexes.keys())
 
             if i.__eq__('b'):
                 continue
-            
-            channel_menu(ts, user_api_key, i, indexes)
+
+            channel_menu(ts, user_api_key, i, indexes, ts.get_channel_name(int(i)))
         else:
             i = Utils.endless_terminal("You dont have any channels in this account.\nDo you want to create one? [y/n] ",
                                 tty=False)

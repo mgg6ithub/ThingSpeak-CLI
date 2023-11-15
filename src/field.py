@@ -69,7 +69,7 @@ class Field:
     def subir_datos(self):
         i = 0
         # print("Press q to stop de upload.")
-        while i < 200:
+        while i < 500:
             # if keyboard.is_pressed('q'):
             #     break
             cpu = psutil.cpu_percent()  # USO DE LA CPU

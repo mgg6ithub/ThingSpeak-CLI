@@ -10,8 +10,9 @@ import pdb
 #              'created_at': '2023-11-08T22:47:43Z', 'updated_at': '2023-11-09T08:32:15Z', 'last_entry_id': 14}, 
 
 class Channel:
-    def __init__(self, user_api_key, index, channel_dict):
+    def __init__(self, user_api_key, index, channel_dict, channel_name):
         self.user_api_key = user_api_key
+        self.channel_name = channel_name
         self.index = index
         self.channel_dict = channel_dict
         self.id = channel_dict['id']
@@ -51,7 +52,7 @@ class Channel:
                             "3 -- Delete the channel.\n\n" \
                             "Enter \"b\" to go backwards"
 
-        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", "4", "5", "6", "7")
+        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", menu=self.channel_name)
 
         if option.__eq__('b'):
             return 'b'
