@@ -7,6 +7,7 @@ from tabulate import tabulate
 from progress.bar import IncrementalBar
 from tqdm import tqdm
 import keyboard
+import csv
 
 # 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
 #            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
@@ -45,7 +46,7 @@ class Field:
 
     # Method to read data from a especific field
     def read_data_from_field(self):
-        
+
         field_values = self.get_data_from_field()
 
         field_entries = []
@@ -63,7 +64,7 @@ class Field:
                 field_entries.append(e)
                 cont += 1
 
-        return tabulate(field_entries, tablefmt="rounded_grid")
+        self.field_data_table = tabulate(field_entries, tablefmt="rounded_grid")
 
 
     def subir_datos(self):
@@ -83,6 +84,46 @@ class Field:
                 "api_key": self.write_key,
                 "field" + self.field_index: cpu
             })
+
+
+    # Method to upload a csv data
+    def upload_csv(self):
+        path_file = input('Enter the csv file path: ')
+        with open(path_file, 'r') as file:
+            csv_reader = csv.reader(file, delimiter='\t')
+            next(csv_reader)
+        
+        # data_values = []
+        # for line in file_data:
+        #     data_values.append(line.split('\t')[2].strip())
+
+        # # BUILT THE QUERY STRING
+        # query_string = '&'.join([f'field{self.field_index}={value}' for value in data_values])
+        # response = ThingSpeak.upload_data_from_csv_file(self.write_key, query_string)
+        # write_api_key=KKRLJNAXF86OLCPI&time_format=absolute&updates=2023-11-11 17:42:11,0.3,,,,,,,,|
+        # 2023-11-11 17:42:27,0.3,,,,,,,,|2023-11-11 17:42:42,0.3,,,,,,,,|
+        # 2023-11-11 17:42:58,0.3,,,,,,,,|2023-11-11 17:43:13,0.4,,,,,,,,|
+        # 2023-11-11 17:43:29,0.3,,,,,,,,|2023-11-11 17:43:45,0.4,,,,,,,,|
+        # 2023-11-11 17:44:00,0.3,,,,,,,,|2023-11-11 17:44:15,0.4,,,,,,,,|
+        # 2023-11-11 17:44:31,0.2,,,,,,,,
+        # Crear la cadena de actualización para ThingSpeak
+            updates = ''
+            for row in csv_reader:
+                timestamp = f'{row[0]} {row[1]}'
+                field2_value = row[2]
+                updates += f'{timestamp},{field2_value},,,,,,,,|'
+
+            # Datos para enviar en la solicitud POST
+            data_to_send = {
+                'write_api_key': self.write_key,
+                'time_format': 'absolute',
+                'updates': updates.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
+            }
+
+            # Convertir datos a formato adecuado para el cuerpo de la solicitud
+            body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
+            r = ThingSpeak.upload_data_from_csv_file(self.channel_id, body_data)
+            input(r)
 
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos
@@ -139,7 +180,7 @@ class Field:
                                     "3 -- txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
 
-        format_options[selected_option](file_name, self.get_data_from_field(), self.field_index)
+        format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index)
 
 
     # Method to clear all the data of the field

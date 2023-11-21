@@ -1,6 +1,7 @@
 
 import os
 import requests
+from requests.exceptions import HTTPError, ConnectionError, InvalidSchema, InvalidURL
 import platform
 import time
 import json
@@ -21,6 +22,7 @@ class Utils:
     def __init__(self):
         self.clear_command = "cls" if platform.system() == "Windows" else "clear"
 
+
     @staticmethod
     # Clear screen method
     def clear():
@@ -28,32 +30,41 @@ class Utils:
         if return_code != 0:
             print("Error al limpiar la pantalla")
 
+
     @staticmethod
     def printRequest(req):
         print(req.status_code)
         print(req.json())
 
-    @staticmethod
-    def printFormatedTable(tableHeaders, tableData):
-        table = tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center")
-        print(table)
-        print("\n")
 
     @staticmethod
+    def printFormatedTable(tableHeaders, tableData):
+        return tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center")
+
+
+
     # Wait method
-    def wait(t):
+    @staticmethod
+    def wait(t=None, filename=None):
         try:
-            time.sleep(t)
+            if t is None:
+                print(filename + " created.")
+                time.sleep(2)
+            else:
+                time.sleep(t)
         except KeyboardInterrupt:
             print("Has interrumpido la espera del programa.\n")
+
 
     @staticmethod
     def hide_cursor():
         print("\x1b[?25l")  # hidden
 
+
     @staticmethod
     def show_cursor():
         print("\x1b[?25h")  # shown
+
 
     @staticmethod
     # Wait and hide cursor
@@ -62,14 +73,15 @@ class Utils:
         Utils.wait(time_to_wait)
         Utils.show_cursor()
 
+
     @staticmethod
     # Endless ThingSpeak-CLI terminal
-    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=None, exit=False, tty=True):
+    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=False, exit=False):
 
-        if clear is not None:
+        if clear:
             Utils.clear()
 
-        if not tty:
+        if tty:
             return input(message)
 
         print(message)
@@ -84,7 +96,7 @@ class Utils:
             if i == 'clear' or i == 'cls':
                 Utils.clear()
             if i == 'help' and help_message:
-                print(help_message)
+                print("\n" + help_message)
             if i in options or i.__eq__("b") or exit:
                 return i
 
@@ -98,17 +110,17 @@ class Utils:
     def make_request(**kwargs):
         try:
             r = requests.request(**kwargs)
+        except InvalidSchema as err:
+            print("Error de esquema inválido:", err.args[0])
+            print("Comprueba que el protocolo es correcto. Ejemplo -> https://")
         except requests.exceptions.HTTPError as err:
-            # print(f"MEDOTOD: {tipo}")
             print("Informacion del error -> " + err.args[0])
         except requests.exceptions.ConnectionError as err:
-            # print(f"MEDOTOD: {tipo}")
             print(err.args[0])
             print("Error al conectarse. Intentos maximos superados.")
-        except requests.exceptions.InvalidSchema as err:
-            # print(f"MEDOTOD: {tipo}")
-            print(err.args[0])
-            print("Comprueba que el protocolo es correcto.\nEjemplo -> https://")
+        except InvalidURL as err:
+            print("URL inválida:", err.args[0])
+            print("Comprueba la validez de la URL.")
         else:
             return r
 
@@ -133,35 +145,43 @@ class Utils:
         time = date.split("T")[1].split("Z")[0]
         return str(ymd) + " " + str(time)
 
+
+    # Decorador wait
+    @staticmethod
+    def wait_decorator(func):
+        def wrapper(*args, **kwargs):
+            Utils.wait()  # Llama a Utils.wait sin proporcionar un valor específico para t
+            return func(*args, **kwargs)
+        return wrapper
+
+
     #
     # Methods to download data and create different file formats
     #
 
     # Method to create a simple .txt with the retrieved data
-    @staticmethod
-    def create_txt(file_name, data, field_index):
-        # pdb.set_trace()
+    @wait_decorator
+    def create_txt(field_data_table, file_name, data, field_index):
         store_path = os.getcwd() + "/" + file_name + ".txt"
-        str_to_write = str(datetime.now().date()) + "\n\n" + data
-        with open(store_path, "w") as file:
-            file.write(str_to_write)
-        print(f"{file_name}.txt created at {store_path}.")
-        time.sleep(3)
+
+        with open(store_path, "w", encoding="utf-8") as file:
+            file.write(field_data_table)
 
 
     # Method to create a simple .csv file with the field data
-    def create_csv(file_name, data, field_index):
+    # @wait_decorator
+    def create_csv(field_data_table, file_name, data, field_index):
         store_path = os.getcwd() + "/" + file_name + ".csv"
 
         with open(store_path, "w") as file:
-            file.write("\t" + "   PRUEBA\n")
-            file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
+            # file.write("\t" + "   PRUEBA\n")
+            # file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
             for row in data:
                 date, time = Utils.format_date(row['created_at']).split(" ")
                 file.write(date + "\t" + time + "\t" + row[f'field' + field_index] + "\n")
-        print(file_name + " created.")
-        Utils.wait(2)
 
+        print('file created')
+        time.sleep(2)
 
     # Method to create a row in a excel sheet with given data
     def insert_row_in_sheet(ws, fila, datos):
@@ -176,8 +196,8 @@ class Utils:
 
 
     # Method to create a xlsx file for excel
-    @staticmethod
-    def create_xlsx(file_name, data, field_index):
+    @wait_decorator
+    def create_xlsx(field_data_table, file_name, data, field_index):
         store_path = os.getcwd() + "/" + file_name + ".xlsx"
 
         try:
@@ -201,6 +221,3 @@ class Utils:
             row += 1
 
         wb.save(file_name + ".xlsx")
-
-        print(f"{file_name}.xlsx created.")
-        Utils.wait(2)

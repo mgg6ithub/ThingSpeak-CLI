@@ -36,47 +36,16 @@ class Channel:
     #     # Check fields of the channels  
     #     fields_of_channel = self.view_channel_fields()
 
-
-    # Channel options
-    def channel_menu(self, index, channel_dict):
-        Utils.clear()
-
-        Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-                                [[f" Channel {index} ", channel_dict['name'],
-                                channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-
-        str_channel_banner = "OPCIONES DEL CANAL\n" \
-                            "------------------\n\n" \
-                            "1 -- Channel information and settings\n\n" \
-                            "2 -- Channel fields.\n\n" \
-                            "3 -- Delete the channel.\n\n" \
-                            "Enter \"b\" to go backwards"
-
-        option = Utils.endless_terminal(str_channel_banner, "1", "2", "3", menu=self.channel_name)
-
-        if option.__eq__('b'):
-            return 'b'
-
-        if option.__eq__("1"):
-            self.update_channels_information()
-
-        elif option.__eq__("2"):
-            return '2'
-
-        elif option.__eq__("3"):
-            i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
-            if i == "y":
-                req = ThingSpeak.remove_channel(self.id, self.user_api_key)
-                if req.status_code == 200:
-                    print("Channel successfully deleted!")
-                    Utils.wait(2)
-                    return 'delete'
+    # Method to create the channel resume table
+    def create_channel_resume_table(self):
+        return Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
+                                [[f" Channel {self.index} ", self.channel_dict['name'],
+                                self.channel_dict['id'], Utils.format_date(self.channel_dict['created_at']), self.channel_dict['description']]])
 
 
     # Method to update channel fields
     def update_channels_information(self):
         Utils.clear()
-
         # print(self.channel_dict)
         # input()
         
@@ -318,6 +287,18 @@ class Channel:
         if r.status_code == 200:
             print("Fields have been deleted")
             time.sleep(2)
+
+
+    # Method to delet the channel
+    def delete_channel(self):
+        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
+        if i == "y":
+            req = ThingSpeak.remove_channel(self.id, self.user_api_key)
+            if req.status_code == 200:
+                print("Channel successfully deleted!")
+                Utils.wait(2)
+                return 'delete'
+
 
 
     # Method to print commands help
