@@ -172,7 +172,7 @@ class ThingSpeak:
         url_clear_field = f'https://api.thingspeak.com/channels/{channel_id}/feeds.json?api_key={api_key}'
         # params = {'api_key': write_api_key}
         return Utils.make_request(method="DELETE", url=url_clear_field)
-    
+
 
     # Method to make de http request to get the feeds of giving channel
     @staticmethod

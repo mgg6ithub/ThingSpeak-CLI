@@ -1,64 +1,33 @@
-import os
-import openpyxl
-import time
-# import pdb
+import csv
+import requests
 
+# Method to upload a csv data
+def upload_csv():
+    # Configuración de la solicitud
+    channel_id = '2353273'
+    url = f'https://api.thingspeak.com/channels/{channel_id}/bulk_update.csv'
+    write_api_key = 'PEEBLQNCAXTAWHQW'
+    time_format = 'relative'
+    
+    # Datos de ejemplo del CSV
+    csv_data = '4,1.1,2,0.3,,,6,7.7,0.8,41.2,19.5,100,ok|3,1,2,3,4,5,6,7,8,41.2,25.1,110,rising'
 
-# feeds = [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:49:27Z', 'entry_id': 3, 'field1': '0.4', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:49:43Z', 'entry_id': 4, 'field1': '0.3', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:49:59Z', 'entry_id': 5, 'field1': '0.2', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:50:14Z', 'entry_id': 6, 'field1': '0.2', 'field2': None}, 
-#         {'created_at': '2023-11-08T22:50:30Z', 'entry_id': 7, 'field1': '0.2', 'field2': None}, 
-#         {'created_at': '2023-11-09T16:13:33Z', 'entry_id': 8, 'field1': None, 'field2': '0.1'}, 
-#         {'created_at': '2023-11-09T16:13:49Z', 'entry_id': 9, 'field1': None, 'field2': '0.3'}, 
-#         {'created_at': '2023-11-09T16:14:04Z', 'entry_id': 10, 'field1': None, 'field2': '0.2'}, 
-#         {'created_at': '2023-11-09T16:14:20Z', 'entry_id': 11, 'field1': None, 'field2': '0.3'}, 
-#         {'created_at': '2023-11-09T16:14:35Z', 'entry_id': 12, 'field1': None, 'field2': '0.4'}, 
-#         {'created_at': '2023-11-09T16:14:51Z', 'entry_id': 13, 'field1': None, 'field2': '0.2'}, 
-#         {'created_at': '2023-11-09T16:15:06Z', 'entry_id': 14, 'field1': None, 'field2': '0.2'}]
+    # Construir cuerpo de la solicitud
+    data_to_send = {
+        'write_api_key': write_api_key,
+        'time_format': time_format,
+        'updates': csv_data,
+    }
 
+    # Realizar la solicitud POST
+    response = requests.post(url, data=data_to_send)
 
-# def introducir_fila_excel(ws, fila, datos):
-#     if type(datos) is list:
-#         # pdb.set_trace()
-#         col = 1
-#         for d in datos:
-#             ws.cell(row=fila, column=col, value=d)
-#             col += 1
-#     else:
-#         ws.cell(row=fila, column=1, value=datos)
+    # Verificar el estado de la respuesta
+    if response.status_code == 200:
+        print('Datos subidos correctamente a ThingSpeak.')
+    else:
+        print('Error al subir datos a ThingSpeak.')
+        print('Código de estado HTTP:', response.status_code)
+        print('Respuesta del servidor:', response.text)
 
-# file_name = "test"
-
-# store_path = os.getcwd() + "/" + file_name + ".xlsx"
-
-# try:
-#     wb = openpyxl.load_workbook(store_path)
-# except FileNotFoundError:
-#     wb = openpyxl.Workbook()
-
-# ws = wb.active
-
-# ws.title = file_name
-
-# row = 2
-# for data_row in feeds:
-#     introducir_fila_excel(ws, row, [data_row['created_at'], data_row['field1']])
-#     row += 1
-
-# introducir_fila_excel(ws, 1, "PRUEBA")
-
-# wb.save(file_name + ".xlsx")
-
-# print(f"{file_name}.xlsx created.")
-# time.sleep(3)
-
-with open('backup.csv', 'r') as file:
-    file_data = file.readlines()
-data_values = []
-for data in file_data:
-    data_values.append(data.split('\t')[2].strip())
-
-print(data_values)
+upload_csv()
