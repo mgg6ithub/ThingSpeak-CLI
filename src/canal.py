@@ -291,14 +291,12 @@ class Channel:
 
     # Method to delet the channel
     def delete_channel(self):
-        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
+        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=True)
         if i == "y":
             req = ThingSpeak.remove_channel(self.id, self.user_api_key)
             if req.status_code == 200:
                 print("Channel successfully deleted!")
                 Utils.wait(2)
-                return 'delete'
-
 
 
     # Method to print commands help

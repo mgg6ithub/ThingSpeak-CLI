@@ -176,10 +176,11 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
         elif option == '2':
             fields_selector(ts, channel)
         
-        channel_option = options_dict[option]()
+        options_dict[option]()
 
         # Refresh
-        if channel_option == '3':
+        if option == '3':
+            ts.remove_channel(channel.id, user_api_key)
             ts.get_account_info()
             break
 
