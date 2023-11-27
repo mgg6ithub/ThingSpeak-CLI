@@ -168,6 +168,11 @@ class Field:
     def download_data(self):
         file_name = str(input("Enter the file name: "))
 
+        date_format = input('Select the date format: \n'\
+                            '1\t->\tThingSpeakAPI dateformat\t2018-06-14T12:12:22\tdata\n' \
+                            '2\t->\t3 Columns date and time \t2018-06-14\t12:12:22\tdata'
+                            )
+
         format_options = {
             "xlsx": Utils.create_xlsx,
             "csv": Utils.create_csv,
@@ -180,7 +185,7 @@ class Field:
                                     "3 -- txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
 
-        format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index)
+        format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index, date_format)
 
 
     # Method to clear all the data of the field

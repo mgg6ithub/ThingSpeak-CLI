@@ -170,15 +170,19 @@ class Utils:
 
     # Method to create a simple .csv file with the field data
     # @wait_decorator
-    def create_csv(field_data_table, file_name, data, field_index):
+    def create_csv(field_data_table, file_name, data, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".csv"
 
         with open(store_path, "w") as file:
             # file.write("\t" + "   PRUEBA\n")
             # file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
             for row in data:
-                date, time = Utils.format_date(row['created_at']).split(" ")
-                file.write(date + "\t" + time + "\t" + row[f'field' + field_index] + "\n")
+                if date_format == '1':
+                    file.write(row['created_at'] + "\t" + row[f'field' + field_index] + "\n")
+                else:
+                    date, t = Utils.format_date(row['created_at']).split(" ")
+                    file.write(date + "\t" + t + "\t" + row[f'field' + field_index] + "\n")
+
 
         print('file created')
         time.sleep(2)
