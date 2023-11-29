@@ -113,13 +113,14 @@ class Field:
                 field2_value = row[2]
                 updates += f'{timestamp},{field2_value},,,,,,,,|'
 
+            input(updates)
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
                 'time_format': 'absolute',
                 'updates': updates.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
-
+            input(data_to_send)
             # Convertir datos a formato adecuado para el cuerpo de la solicitud
             body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
             r = ThingSpeak.upload_data_from_csv_file(self.channel_id, body_data)
@@ -169,9 +170,9 @@ class Field:
         file_name = str(input("Enter the file name: "))
 
         date_format = input('Select the date format: \n'\
-                            '1\t->\tThingSpeakAPI dateformat\t2018-06-14T12:12:22\tdata\n' \
-                            '2\t->\t3 Columns date and time \t2018-06-14\t12:12:22\tdata'
-                            )
+            '1\t->\tThingSpeakAPI dateformat\t2018-06-14T12:12:22\tdata\n' \
+            '2\t->\t3 Columns date and time \t2018-06-14\t12:12:22\tdata'
+        )
 
         format_options = {
             "xlsx": Utils.create_xlsx,
@@ -180,9 +181,9 @@ class Field:
         }
 
         str_banner_choose_format = "Choose file format for downloading the data.\n\n" \
-                                    "1 -- xlsx\n" \
-                                    "2 -- csv\n" \
-                                    "3 -- txt\n"
+                    "1 -- xlsx\n" \
+                    "2 -- csv\n" \
+                    "3 -- txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
 
         format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index, date_format)
