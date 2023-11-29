@@ -4,6 +4,7 @@ import time
 from src.thingspeak import ThingSpeak
 from tabulate import tabulate
 import pdb
+import re
 
 # {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
 #              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
@@ -102,25 +103,50 @@ class Channel:
 
         updated_information = {"api_key": self.user_api_key}
         str_modify_message = "\nExample\n" \
-                            "ts> name:NEW CHANNEL NAME,description:This is the new description"
+                            "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
 
         i = Utils.endless_terminal(str_modify_message, exit=True)
 
         if i.__eq__("b"):
             return
 
-        entries = i.split(",")
+        tags_list = []
+        tags_end_valid_word = ''
+        input_string_tags_removed = ''
+        if 'tags' in i:
+            tags_string = i.split('tags:')[1].split(',')
+            
+            for tag in tags_string:
+                if ':' in tag:
+                    tags_end_valid_word = tag.split(':')[0]
+                    break
+                tags_list.append(tag)
+            first_part = i.split(',tags:')[0]
+            if tags_end_valid_word:
+                second_part = i.split(tags_end_valid_word)[1]
+                input_string_tags_removed = first_part + "," + tags_end_valid_word + second_part
+            # input(input_string_tags_removed)
+            input(tags_list)
 
-        for entry in entries:
-            key, value = entry.split(":", 1)
-            key = key.strip()  # Asegúrate de que no haya espacios en blanco
-            value = value.strip()  # Asegúrate de que no haya espacios en blanco
+        if input_string_tags_removed == '': # Solamente se ha introducido tags
+            string_joined_tags = ','.join(tags_list)
+            input(string_joined_tags)
+            updated_information['tags'] = ','.join(tags_list)
+        else: # hya mas cosas aparte de tags
+            entries = input_string_tags_removed.split(",")
 
-            if key in valid_fields_to_modify:
-                updated_information[key] = value
-            else:
-                return False
+            for entry in entries:
+                key, value = entry.split(":", 1)
+                key = key.strip()  # Asegúrate de que no haya espacios en blanco
+                value = value.strip()  # Asegúrate de que no haya espacios en blanco
 
+                if key in valid_fields_to_modify:
+                    updated_information[key] = value
+                else:
+                    return False
+            if tags_list:
+                updated_information['tags'] = ','.join(tags_list)
+        input(updated_information)
         req = ThingSpeak.update_channel_information(self.id, updated_information)
 
         if req.status_code == 200:
