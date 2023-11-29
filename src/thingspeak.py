@@ -185,4 +185,4 @@ class ThingSpeak:
     @staticmethod
     def upload_data_from_csv_file(channel_id, body):
         url_bulk_csv = f'https://api.thingspeak.com/channels/{channel_id}/bulk_update.csv'
-        return Utils.make_request(method="GET", url=url_bulk_csv, data=body)
+        return Utils.make_request(method="POST", url=url_bulk_csv, data=body)

@@ -104,6 +104,12 @@ class Channel:
         updated_information = {"api_key": self.user_api_key}
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
+        # str_help_channel_info = "more info\tKeys of the channel.\n" \
+        #                         "rename fields\tUpdate a the channel information. Name, tags, etc..."
+        
+        # options_dict = {
+        #     "more info":
+        # }
 
         i = Utils.endless_terminal(str_modify_message, exit=True)
 
@@ -289,21 +295,26 @@ class Channel:
                 input()
 
 
-    # Method to delete one field
-    def delete_one_field(self):
+    # Method to rename a field
+    def rename_field_name(self):
         selected_index = Utils.endless_terminal(self.table_of_fields + "\n\nSelect the index of the field you want to delete.", *self.valid_field_indexes)
-
+        new_name = str(input("Enter the new name: "))
         remove_field = {"api_key": self.user_api_key}
 
         for i in self.valid_field_indexes:
             if i == selected_index:
-                remove_field['field' + i] = ""
+                remove_field['field' + i] = new_name
         
         req = ThingSpeak.create_one_field_for_channel(remove_field, self.id)
         
         if req.status_code == 200:
-            print(f"Field deleted.")
+            print(f"Field renamed.")
             time.sleep(2)
+
+
+    def delete_one_field():
+        pass
+
 
     # Method to create fields from a channel
     def create_fields_in_channel(self):

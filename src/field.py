@@ -85,19 +85,7 @@ class Field:
                 "field" + self.field_index: cpu
             })
 
-
-    # Method to upload a csv data
-    def upload_csv(self):
-        path_file = input('Enter the csv file path: ')
-        with open(path_file, 'r') as file:
-            csv_reader = csv.reader(file, delimiter='\t')
-            next(csv_reader)
-        
-        # data_values = []
-        # for line in file_data:
-        #     data_values.append(line.split('\t')[2].strip())
-
-        # # BUILT THE QUERY STRING
+# # BUILT THE QUERY STRING
         # query_string = '&'.join([f'field{self.field_index}={value}' for value in data_values])
         # response = ThingSpeak.upload_data_from_csv_file(self.write_key, query_string)
         # write_api_key=KKRLJNAXF86OLCPI&time_format=absolute&updates=2023-11-11 17:42:11,0.3,,,,,,,,|
@@ -106,25 +94,54 @@ class Field:
         # 2023-11-11 17:43:29,0.3,,,,,,,,|2023-11-11 17:43:45,0.4,,,,,,,,|
         # 2023-11-11 17:44:00,0.3,,,,,,,,|2023-11-11 17:44:15,0.4,,,,,,,,|
         # 2023-11-11 17:44:31,0.2,,,,,,,,
-        # Crear la cadena de actualización para ThingSpeak
-            updates = ''
-            for row in csv_reader:
-                timestamp = f'{row[0]} {row[1]}'
-                field2_value = row[2]
-                updates += f'{timestamp},{field2_value},,,,,,,,|'
 
-            input(updates)
+    # Method to upload a csv data
+    def upload_csv(self):
+        path_file = input('Enter the csv file path: ')
+
+        # check the date defualt no dateformat absolute
+
+        with open(path_file, 'r') as file:
+            # csv_reader = csv.reader(file, delimiter='\t')
+            # next(csv_reader)
+
+            # updates = ''
+            # for row in csv_reader:
+            #     timestamp = f'{row[0]} {row[1]}'
+            #     field2_value = row[2]
+            #     updates += f'{timestamp},{field2_value},,,,,,,,|'
+            
+            striped_data = [word.strip().split('\t')[2] for word in file.readlines()]
+
+            # Crear la cadena de actualización para ThingSpeak
+            string_template = '0,,,,,,,,,,,,ok|'
+
+            bulk_data = ""
+            for index, row_data in enumerate(striped_data):
+                lista = string_template.split(',')
+                lista[0] = str(index)
+                lista[int(self.field_index)] = row_data
+                temp_template = ','.join(lista)
+
+                bulk_data += temp_template
+
+                if index == len(striped_data) - 1:
+                    if bulk_data.endswith('|'):
+                        bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
+                        break
+
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
-                'time_format': 'absolute',
-                'updates': updates.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
+                'time_format': 'relative',
+                'updates': bulk_data #.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
+
             input(data_to_send)
             # Convertir datos a formato adecuado para el cuerpo de la solicitud
-            body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
-            r = ThingSpeak.upload_data_from_csv_file(self.channel_id, body_data)
-            input(r)
+            # body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
+            ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
+            return 'actualizar'
 
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos

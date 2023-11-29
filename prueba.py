@@ -4,9 +4,9 @@ import requests
 # Method to upload a csv data
 def upload_csv(pos):
     # Configuración de la solicitud
-    channel_id = '2360614'
+    channel_id = '2363113'
     url = f'https://api.thingspeak.com/channels/{channel_id}/bulk_update.csv'
-    write_api_key = '1E5R1MK4YPV0RJK0'
+    write_api_key = 'WS24QUGUDCF125HG'
     time_format = 'absolute'
 
     with open('backup.csv', 'r') as file:
@@ -29,7 +29,7 @@ def upload_csv(pos):
 
         if index == len(striped_data) - 1:
             if bulk_data.endswith('|'):
-                bulk_data = bulk_data[:-1]
+                bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
                 break
 
     # input(bulk_data)

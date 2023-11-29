@@ -56,12 +56,10 @@ def login():
             if checkUserApyKey(user_api_key):
                 print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
                 Utils.wait_animation(1)
-                # ts = ThingSpeak(user_api_key, u)
-                # menu_principal(user_api_key)
+                main_menu(user_api_key)
             else:
                 print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
                 Utils.wait_animation(1)
-        i = input()
 
 
 # Method to control de flow of a selected field
@@ -80,8 +78,8 @@ def field_menu(ts, channel, index, field_name):
         "upload": field.subir_datos,
         "upload csv": field.upload_csv,
         "download data": field.download_data,
-        "clear field": field.clear_field_data,
-        "delete field": field.delete_field
+        "clear field": field.clear_field_data, # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
+        "delete field": field.delete_field # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
     }
     
     while True:
@@ -90,7 +88,10 @@ def field_menu(ts, channel, index, field_name):
         if option == 'b':
             break
 
-        options_dict[option]()
+        field_operation = options_dict[option]()
+        input(field_operation)
+        if field_operation == 'actualizar':
+            field.read_data_from_field()
 
     # input("HERE")
     # while True:
@@ -106,15 +107,17 @@ def fields_selector(ts, channel):
     pattern = re.compile(r"^[1-8]$")
 
     str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
-                                                "clear fields\tClear all the data from all the fields.\n" \
-                                                "delete field\tDelete a existing field.\n" \
-                                                "delete all fields\tDelete all existing field and their data.\n"
+    "rename field\tRename a field and give it a new name.\n" \
+    "clear fields\tClear all the data from all the fields.\n" \
+    "delete field\tDelete a existing field.\n" \
+    "delete all fields\tDelete all existing field and their data.\n"
 
     options_dict = {
-        "create field": channel.create_one_field,
-        "clear fields": channel.clear_data_from_all_fields,
-        "delete field": channel.delete_one_field,
-        "delete all fields": channel.delete_all_fields
+        "create field": channel.create_one_field, # OK
+        "rename field": channel.rename_field_name, # OK
+        "clear fields": channel.clear_data_from_all_fields, # OK
+        "delete field": channel.delete_one_field, # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
+        "delete all fields": channel.delete_all_fields # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
     }
     
     while True:
@@ -191,9 +194,9 @@ def main_menu(user_api_key):
 
     while True:
         if ts.hayCanales:
-            str_banner = "1 -- Ver canales públicos.\n\n" \
-                        "2 -- Ver canales privados.\n\n" \
-                        "3 -- Ver todos los canales.\n\n" \
+            str_banner = "1 -- PUBLIC CHANNELS.\n\n" \
+                        "2 -- PRIVATE CHANNELS.\n\n" \
+                        "3 -- ALL CHANNELS.\n\n" \
                         "4 -- Create a new channel.\n\n" \
 
             option = Utils.endless_terminal(str_banner, "1", "2", "3", "4", clear="yes")
@@ -225,6 +228,6 @@ def main_menu(user_api_key):
                 ts.create_channel(user_api_key)
                 ts.get_account_info()
 
-
+"0WX1WIYR7G3QMKUR"
 if __name__ == '__main__':
-    main_menu("0WX1WIYR7G3QMKUR")
+    login()
