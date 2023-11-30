@@ -76,12 +76,12 @@ class Utils:
 
     @staticmethod
     # Endless ThingSpeak-CLI terminal
-    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=False, exit=False):
+    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=True, exit=False):
 
         if clear:
             Utils.clear()
 
-        if tty:
+        if not tty:
             return input(message)
 
         print(message)

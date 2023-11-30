@@ -1,4 +1,5 @@
 from src.utils import Utils
+from colorama import Fore
 
 class ThingSpeak:
     def __init__(self, user_apy_key):
@@ -127,7 +128,11 @@ class ThingSpeak:
     # Method to create a channel
     @staticmethod
     def create_channel(user_api_key):
-        nombre = input("Enter the new channel name: ")
+        Utils.clear()
+        nombre = str(input("Enter the new channel name: "))
+
+        # ADD SOME MORE PROMPTS INPUT TO CREATE THE CHENNELS WITH CUSTOM INFO
+
         body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{nombre}',
                 'description': 'Esta es la descripcion del canal 1',
                 'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
@@ -139,10 +144,10 @@ class ThingSpeak:
 
         r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
 
-        print(r.status_code)
-        print(r.json())
-
-        i = input()
+        if r.status_code == 200:
+            Utils.clear()
+            print(f'New channel {nombre}' + Fore.GREEN  + ' successfully' + Fore.WHITE + 'created' )
+            Utils.wait(2)
 
 
     # Method to update information of the channel

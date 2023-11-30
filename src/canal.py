@@ -19,7 +19,17 @@ class Channel:
         self.id = channel_dict['id']
         self.write_api_key = channel_dict['api_keys'][0]['api_key']
         self.read_api_key = channel_dict['api_keys'][1]['api_key']
-
+        self.valid_channel_information_fields =  [
+            "latitude",
+            "description",
+            "longitude",
+            "elevation",
+            "metadata",
+            "name",
+            "public_flag",
+            "tags",
+            "url",
+        ]
 
     # Method to print channels
     # def print_channel(self, index, channel_dict):
@@ -44,11 +54,18 @@ class Channel:
                                 self.channel_dict['id'], Utils.format_date(self.channel_dict['created_at']), self.channel_dict['description']]])
 
 
-    # Method to update channel fields
-    def update_channels_information(self):
+    def check_urls(self, data, url_type):
+
+        url = self.channel_dict[f'{url_type}']
+        
+        if url:
+            data[f'{url_type}'] = url
+        else:
+            data[f'{url_type}'] = ''
+    
+
+    def generate_channel_information_table(self):
         Utils.clear()
-        # print(self.channel_dict)
-        # input()
         
         # VALORES QUE NO SE PUEDEN CAMBIAR
         # channel id
@@ -57,36 +74,15 @@ class Channel:
         # rankig (Porcentaje completado del canal)
         # license_id
 
-        valid_fields_to_modify = [
-            "latitude",
-            "description",
-            "longitude",
-            "elevation",
-            "metadata",
-            "name",
-            "public_flag",
-            "tags",
-            "url",
-        ]
-
         data = {
             "name": self.channel_dict['name'],
             "description": self.channel_dict['description'],
             "metadata": self.channel_dict['metadata'],
-            "tags": ' '.join(tag['name'] for tag in self.channel_dict['tags'])
+            "tags": ' '.join(tag['name'] for tag in self.channel_dict['tags']) # Iterate over the tags for printing them
         }
 
-        url = self.channel_dict['url']
-        if url:
-            data['url'] = url
-        else:
-            data['url'] = ""
-        
-        url_github = self.channel_dict['github_url']
-        if url_github:
-            data['url_github'] = url_github
-        else:
-            data['url_github'] = ""
+        self.check_urls(data, "url")
+        self.check_urls(data, "github_url")
         
         data['elevation'] = self.channel_dict['elevation']
         data['latitude'] = self.channel_dict['latitude']
@@ -97,28 +93,26 @@ class Channel:
         table_data = [(key, value) for key, value in data.items()]
 
         # Utilizar tabulate para mostrar la información en una tabla
-        table = tabulate(table_data, tablefmt="rounded_grid")
+        return tabulate(table_data, tablefmt="rounded_grid")
+        
 
-        print(table)
+    def display_more_channel_info(self):
+        input("FUNCIONA MORE INFOR DESPLEGAR KEYS")
 
-        updated_information = {"api_key": self.user_api_key}
+
+    # Method to update channel fields
+    def update_channels_information(self):
+
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
-        # str_help_channel_info = "more info\tKeys of the channel.\n" \
-        #                         "rename fields\tUpdate a the channel information. Name, tags, etc..."
-        
-        # options_dict = {
-        #     "more info":
-        # }
+        print(str_modify_message)
 
-        i = Utils.endless_terminal(str_modify_message, exit=True)
-
-        if i.__eq__("b"):
-            return
+        i = str(input("se ejecuta> "))
 
         tags_list = []
         tags_end_valid_word = ''
         input_string_tags_removed = ''
+        updated_information = {"api_key": self.user_api_key}
         #COMPROBAR SI HAY TAGS PARA FORMATEAR LA CADENA Y OBTENER TODAS
         if 'tags' in i:
             tags_string = i.split('tags:')[1].split(',')
@@ -132,33 +126,26 @@ class Channel:
             first_part = ''
             second_part = ''
             first_part = i.split('tags:')[0]
-            input(first_part)
-            if first_part == '': # No hay anda delante de tags
-                print('No hay nada delante')
+
             if tags_end_valid_word: # Si hay un valid word despues de las tags es que hay mas valores
                 second_part = i.split(tags_end_valid_word)[1]
-            if second_part == '':
-                input("No hay nada detras")
-            input_string_tags_removed = first_part + tags_end_valid_word + second_part
 
-            if input_string_tags_removed == '':
-                input("No hay cadena resultante")
-            input(tags_list)
+            input_string_tags_removed = first_part + tags_end_valid_word + second_part
 
             # SI SOLO HAY TAGS
             if input_string_tags_removed == '': # Solamente se ha introducido tags
-                string_joined_tags = ','.join(tags_list)
-                input(string_joined_tags)
                 updated_information['tags'] = ','.join(tags_list)
-            else: # hya mas cosas aparte de tags
-                entries = input_string_tags_removed.split(",")
+            else: # hay mas cosas aparte de tags
+                if second_part == '':
+                    input_string_tags_removed = input_string_tags_removed.rstrip(',')
 
+                entries = input_string_tags_removed.split(",")
                 for entry in entries:
                     key, value = entry.split(":", 1)
                     key = key.strip()  # Asegúrate de que no haya espacios en blanco
                     value = value.strip()  # Asegúrate de que no haya espacios en blanco
 
-                    if key in valid_fields_to_modify:
+                    if key in self.valid_channel_information_fields:
                         updated_information[key] = value
                     else:
                         return False
@@ -172,19 +159,18 @@ class Channel:
                 key = key.strip()  # Asegúrate de que no haya espacios en blanco
                 value = value.strip()  # Asegúrate de que no haya espacios en blanco
 
-                if key in valid_fields_to_modify:
+                if key in self.valid_channel_information_fields:
                     updated_information[key] = value
                 else:
                     return False
 
-        input(updated_information)
         req = ThingSpeak.update_channel_information(self.id, updated_information)
-
         if req.status_code == 200:
             self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
             print("Canal actualizado")
             Utils.wait(2)
-    
+
+
     # Method to get the fields of the channel
     def get_channel_fields(self):
         req = ThingSpeak.get_channel_fields(self.id, self.channel_dict['api_keys'][1]['api_key'])
@@ -281,19 +267,6 @@ class Channel:
             print(f"New field {field_name} created.")
             time.sleep(2)
 
-    
-    # Method to clear all the data from a field
-    def clear_data_from_all_fields(self):
-        Utils.clear()
-        if input("Are you sure you want to delete the data from all fields? [y/n]") == 'y':
-            res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
-            if res.status_code == 200:
-                print("All the data from fields deleted.")
-                time.sleep(2)
-            else:
-                print(res.status_code)
-                input()
-
 
     # Method to rename a field
     def rename_field_name(self):
@@ -349,23 +322,31 @@ class Channel:
         if r.status_code == 200:
             print("Fields have been deleted")
             time.sleep(2)
+    
+
+    # Method to clear all the data from all channel fields
+    def clear_data_from_all_fields(self):
+        Utils.clear()
+        i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=True)
+        if i == 'y':
+            res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
+            if res.status_code == 200:
+                Utils.clear()
+                print("All the data from fields deleted.")
+                Utils.wait()
+                return 'reset'
+            else:
+                print(res.status_code)
+                input()
 
 
     # Method to delet the channel
     def delete_channel(self):
-        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=True)
+        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
         if i == "y":
             req = ThingSpeak.remove_channel(self.id, self.user_api_key)
             if req.status_code == 200:
+                Utils.clear()
                 print("Channel successfully deleted!")
                 Utils.wait(2)
-
-
-    # Method to print commands help
-    # @staticmethod
-    # def print_help():
-    #     str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
-    #                                             "clear fields\tClear all the data from all the fields.\n" \
-    #                                             "delete field\tDelete a existing field.\n" \
-    #                                             "delete all fields\tDelete all existing field and their data.\n"
-    #     return str_field_list_commands_help
+                return 'reset'
