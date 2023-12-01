@@ -39,7 +39,7 @@ class Utils:
 
     @staticmethod
     def printFormatedTable(tableHeaders, tableData):
-        return tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center")
+        return tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center", colalign=("center",))
 
 
 
@@ -76,7 +76,7 @@ class Utils:
 
     @staticmethod
     # Endless ThingSpeak-CLI terminal
-    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=True, exit=False):
+    def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=True, exit=False, only_string=False):
 
         if clear:
             Utils.clear()
@@ -97,13 +97,17 @@ class Utils:
                 Utils.clear()
             if i == 'help' and help_message:
                 print("\n" + help_message)
-            if i in options or i.__eq__("b") or exit:
+            if only_string:
                 return i
+            if i in options or i.__eq__("b") or exit:
+                return i                
+
 
     @staticmethod
     # Metodo para convertir una lista a un objeto json
     def list_to_json(lista):
         return json.dumps(lista)
+
 
     @staticmethod
     # Method to make http requests

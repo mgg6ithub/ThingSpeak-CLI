@@ -47,6 +47,10 @@ class Channel:
     #     # Check fields of the channels  
     #     fields_of_channel = self.view_channel_fields()
 
+    # Method to return the flow control to the main channel menu
+    def doNothing(self):
+        pass
+
     # Method to create the channel resume table
     def create_channel_resume_table(self):
         return Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
@@ -73,7 +77,7 @@ class Channel:
         # Last entry
         # rankig (Porcentaje completado del canal)
         # license_id
-
+        self.channel_name = self.channel_dict['name']
         data = {
             "name": self.channel_dict['name'],
             "description": self.channel_dict['description'],
@@ -97,49 +101,76 @@ class Channel:
         
 
     def display_more_channel_info(self):
-        input("FUNCIONA MORE INFOR DESPLEGAR KEYS")
-
+        table = Utils.printFormatedTable(["PERCENTAGE COMPLETED","CREATED DATE", "WRITE API KEY", "READ API KEY", "LAST ENTRY"],
+                                [["%" + str(self.channel_dict['ranking']), self.channel_dict['created_at'],self.write_api_key, self.read_api_key, self.channel_dict['last_entry_id']]])
+        return table
 
     # Method to update channel fields
     def update_channels_information(self):
 
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
-        print(str_modify_message)
+        # print(str_modify_message)
 
-        i = str(input("se ejecuta> "))
+        i = Utils.endless_terminal(message=str_modify_message, menu=self.channel_name, only_string=True)
 
-        tags_list = []
-        tags_end_valid_word = ''
-        input_string_tags_removed = ''
-        updated_information = {"api_key": self.user_api_key}
-        #COMPROBAR SI HAY TAGS PARA FORMATEAR LA CADENA Y OBTENER TODAS
-        if 'tags' in i:
-            tags_string = i.split('tags:')[1].split(',')
+        # CHECK INPUT VALUES
+        input_values = i.split(',')
+        flag = True
+        for value in input_values:
+            if ':' in value:
+                v = value.split(':')[0]
+                # input(v)
+                if v not in self.valid_channel_information_fields:
+                    flag = False
 
-            for tag in tags_string:
-                if ':' in tag:
-                    tags_end_valid_word = tag.split(':')[0]
-                    break
-                tags_list.append(tag)
-            #COMPROBAR SI HAY MAS COSAS DELANTE DE TAGS Y DETRAS
-            first_part = ''
-            second_part = ''
-            first_part = i.split('tags:')[0]
+        if flag:
+            tags_list = []
+            tags_end_valid_word = ''
+            input_string_tags_removed = ''
+            updated_information = {"api_key": self.user_api_key}
+            #COMPROBAR SI HAY TAGS PARA FORMATEAR LA CADENA Y OBTENER TODAS
+            if 'tags' in i:
+                tags_string = i.split('tags:')[1].split(',')
 
-            if tags_end_valid_word: # Si hay un valid word despues de las tags es que hay mas valores
-                second_part = i.split(tags_end_valid_word)[1]
+                for tag in tags_string:
+                    if ':' in tag:
+                        tags_end_valid_word = tag.split(':')[0]
+                        break
+                    tags_list.append(tag)
 
-            input_string_tags_removed = first_part + tags_end_valid_word + second_part
+                #COMPROBAR SI HAY MAS COSAS DELANTE DE TAGS Y DETRAS
+                first_part = ''
+                second_part = ''
+                first_part = i.split('tags:')[0]
 
-            # SI SOLO HAY TAGS
-            if input_string_tags_removed == '': # Solamente se ha introducido tags
-                updated_information['tags'] = ','.join(tags_list)
-            else: # hay mas cosas aparte de tags
-                if second_part == '':
-                    input_string_tags_removed = input_string_tags_removed.rstrip(',')
+                if tags_end_valid_word: # Si hay un valid word despues de las tags es que hay mas valores
+                    second_part = i.split(tags_end_valid_word)[1]
 
-                entries = input_string_tags_removed.split(",")
+                input_string_tags_removed = first_part + tags_end_valid_word + second_part
+
+                # SI SOLO HAY TAGS
+                if input_string_tags_removed == '': # Solamente se ha introducido tags
+                    updated_information['tags'] = ','.join(tags_list)
+                else: # hay mas cosas aparte de tags
+                    if second_part == '':
+                        input_string_tags_removed = input_string_tags_removed.rstrip(',')
+
+                    entries = input_string_tags_removed.split(",")
+                    for entry in entries:
+                        key, value = entry.split(":", 1)
+                        key = key.strip()  # Asegúrate de que no haya espacios en blanco
+                        value = value.strip()  # Asegúrate de que no haya espacios en blanco
+
+                        if key in self.valid_channel_information_fields:
+                            updated_information[key] = value
+                        else:
+                            return False
+                    if tags_list:
+                        updated_information['tags'] = ','.join(tags_list)
+            # SI NO HAY TAGS SE PROCEDE NORMAL
+            else:
+                entries = i.split(",")
                 for entry in entries:
                     key, value = entry.split(":", 1)
                     key = key.strip()  # Asegúrate de que no haya espacios en blanco
@@ -149,26 +180,17 @@ class Channel:
                         updated_information[key] = value
                     else:
                         return False
-                if tags_list:
-                    updated_information['tags'] = ','.join(tags_list)
-        # SI NO HAY TAGS SE PROCEDE NORMAL
+
+            req = ThingSpeak.update_channel_information(self.id, updated_information)
+            if req.status_code == 200:
+                self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
+                print("Canal actualizado")
+                Utils.wait(2)
+                return ''
         else:
-            entries = i.split(",")
-            for entry in entries:
-                key, value = entry.split(":", 1)
-                key = key.strip()  # Asegúrate de que no haya espacios en blanco
-                value = value.strip()  # Asegúrate de que no haya espacios en blanco
-
-                if key in self.valid_channel_information_fields:
-                    updated_information[key] = value
-                else:
-                    return False
-
-        req = ThingSpeak.update_channel_information(self.id, updated_information)
-        if req.status_code == 200:
-            self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-            print("Canal actualizado")
+            print("Mensaje error has introducido campos que no existen.")
             Utils.wait(2)
+            return ''
 
 
     # Method to get the fields of the channel

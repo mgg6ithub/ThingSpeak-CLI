@@ -157,7 +157,7 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
                             "Enter \"b\" to go backwards"
 
     options_dict = {
-        "1": channel.update_channels_information,
+        "1": channel.doNothing,
         "2": channel.get_channel_fields,
         "3": channel.clear_data_from_all_fields,
         "4": channel.delete_channel
@@ -168,8 +168,11 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
         option = Utils.endless_terminal(channel.create_channel_resume_table() + str_channel_help, *list(options_dict.keys()), menu=channel.channel_name, clear=True)
 
         if option == '1':
+            
+            more_info_table = ''
 
             while True:
+
                 str_help_channel_info = "more info\tKeys of the channel.\n" \
                                         "update info\tUpdate a the channel information. Name, tags, etc..."
                 
@@ -178,13 +181,15 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
                     "update info": channel.update_channels_information
                 }
 
-                update_option = Utils.endless_terminal(channel.generate_channel_information_table(), *list(update_menu_options_dict.keys()), help_message=str_help_channel_info, menu=channel.channel_name, clear=True)
+                update_option = Utils.endless_terminal(channel.generate_channel_information_table() + '\n' + more_info_table, 
+                                                       *list(update_menu_options_dict.keys()),
+                                                        help_message=str_help_channel_info, 
+                                                        menu=channel.channel_name, clear=True)
 
                 if update_option == 'b':
                     break
 
-                update_menu_options_dict[update_option]()
-
+                more_info_table = update_menu_options_dict[update_option]()
 
         if option == 'b':
             break
@@ -243,4 +248,5 @@ def main_menu(user_api_key):
 
 "0WX1WIYR7G3QMKUR"
 if __name__ == '__main__':
-    login()
+    # login()
+    main_menu('0WX1WIYR7G3QMKUR')
