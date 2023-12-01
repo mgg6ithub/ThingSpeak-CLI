@@ -8,6 +8,7 @@ from progress.bar import IncrementalBar
 from tqdm import tqdm
 import keyboard
 import csv
+import re
 
 # 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
 #            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
@@ -204,7 +205,22 @@ class Field:
                     "3 -> txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()), clear=True)
 
-        format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index, date_format)
+        pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
+        coincidencias = re.findall(pattern, self.field_data_table)
+
+        data = []
+        for index, date, time, value in coincidencias:
+            row = []
+            row.append(index)
+            if date_format == '1':
+                row.append(date + 'T' + time)
+            else:
+                row.append(date)
+                row.append(time)
+            row.append(value)
+            data.append(row)
+        input(data)
+        format_options[selected_option](data, file_name, self.field_index, date_format)
 
 
     # Method to clear all the data of the field

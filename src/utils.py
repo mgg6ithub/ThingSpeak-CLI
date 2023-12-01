@@ -172,46 +172,31 @@ class Utils:
     #
 
     # Method to create a simple .txt with the retrieved data
-    def create_txt(field_data_table, file_name, data, field_index, date_format):
+    def create_txt(data, file_name, field_index, date_format):
         save_path = os.getcwd() + "/" + file_name + ".txt"
         
         try:
-            if date_format == '1':
-                pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
+            field_data_table = tabulate(data, tablefmt='rounded_grid')
 
-                coincidencias = re.findall(pattern, field_data_table)
-
-                all_rows = []
-                for index, date, time, value in coincidencias:
-                    row = []
-                    row.append(index)
-                    row.append(date + 'T' + time)
-                    row.append(value)
-                    all_rows.append(row)
-
-                field_data_table = tabulate(all_rows, tablefmt='rounded_grid')
-
-                with open(save_path, "w", encoding="utf-8") as file:
-                    file.write(field_data_table)
-                Utils.give_response(message="File created", status=True)  
+            with open(save_path, "w", encoding="utf-8") as file:
+                file.write(field_data_table)
+            Utils.give_response(message="File created", status=True)  
         except Exception as e:
             Utils.give_response(message=f"File created {str(e)}", status=True)  
 
 
     # Method to create a simple .csv file with the field data
-    def create_csv(field_data_table, file_name, data, field_index, date_format):
+    def create_csv(data, file_name, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".csv"
         
         try:
             with open(store_path, "w") as file:
-            # file.write("\t" + "   PRUEBA\n")
-            # file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
-                for row in data:
+                for i, row in enumerate(data):
+                    separator = '\n' if i < len(data) - 1 else ''
                     if date_format == '1':
-                        file.write(row['created_at'] + "\t" + row[f'field' + field_index] + "\n")
+                        file.write(f"{row[0]}\t{row[1]}\t{row[2]}{separator}")
                     else:
-                        date, t = Utils.format_date(row['created_at']).split(" ")
-                        file.write(date + "\t" + t + "\t" + row[f'field' + field_index] + "\n")
+                        file.write(f"{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}{separator}")
             Utils.give_response(message="File created", status=True)        
         except Exception as e:
             Utils.give_response(message=f"File created {str(e)}", status=False)
@@ -230,28 +215,28 @@ class Utils:
 
 
     # Method to create a xlsx file for excel
-    def create_xlsx(field_data_table, file_name, data, field_index, date_format):
+    def create_xlsx(data, file_name, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".xlsx"
 
         try:
-            wb = openpyxl.load_workbook(store_path)
+            wb = openpyxl.load_workbook(store_path)   
+        except FileNotFoundError:
+            wb = openpyxl.Workbook()
+
+        try:
             ws = wb.active
             ws.title = file_name
 
-            # ws.merge_cells('A1:C1')
-            # ws['A1'] = "PRUEBA"
-            # Utils.introducir_fila_excel(ws, 1, "PRUEBA")
-            # Utils.insert_row_in_sheet(ws, 2, ["Date", "Time", "Value"])
+            for index, data_row in enumerate(data):
+                try:
+                    if date_format == '1':
+                        Utils.insert_row_in_sheet(ws, index + 1, [data_row[1], data_row[2]])
+                    else:
+                        Utils.insert_row_in_sheet(ws, index + 1, [data_row[1], data_row[2], data_row[3]])
+                except Exception as e:
+                    Utils.give_response(message=f"Error inserting row {index + 1}: {str(e)}", status=False)
 
-            row = 3
-            for data_row in data:
-                datetime = Utils.format_date(data_row['created_at'])
-                date, time = datetime.split(" ")
-                Utils.insert_row_in_sheet(ws, row, [date, time, data_row[f'field' + field_index]])
-                row += 1
-
-            wb.save(file_name + ".xlsx")
-            Utils.give_response(message=f"File created", status=True)
-        except FileNotFoundError:
-            wb = openpyxl.Workbook()
-            Utils.give_response(message=f"File created", status=False)
+            wb.save(store_path)
+            Utils.give_response(message=f"File created at: {store_path}", status=True)
+        except Exception as e:
+            Utils.give_response(message=f"Error creating file: {str(e)}", status=False)
