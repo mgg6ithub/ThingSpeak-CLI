@@ -9,7 +9,6 @@ class ThingSpeak:
 
 
     # Method to print the overall information of a channel
-    # Name  Id
     def print_channel_index(self, channels):
         Utils.clear()
         indexes = {}
@@ -24,11 +23,6 @@ class ThingSpeak:
 
 
     # Method to obtain all the channels from the logged account
-    # {'id': 2299146, 'name': 'Canal1', 'description': 'Esta es la descripcion del canal 1',
-    # 'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
-    # 'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
-    # 'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
-    # 'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
     def get_account_info(self):
         req = self.get_channels_list()
 

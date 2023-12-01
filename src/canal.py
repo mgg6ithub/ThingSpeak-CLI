@@ -6,9 +6,6 @@ from tabulate import tabulate
 import pdb
 import re
 
-# {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
-#              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
-#              'created_at': '2023-11-08T22:47:43Z', 'updated_at': '2023-11-09T08:32:15Z', 'last_entry_id': 14}, 
 
 class Channel:
     def __init__(self, user_api_key, index, channel_dict, channel_name):
@@ -31,21 +28,6 @@ class Channel:
             "url",
         ]
 
-    # Method to print channels
-    # def print_channel(self, index, channel_dict):
-    #     Utils.clear()
-
-    #     Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-    #                             [[f" Channel {index} ", channel_dict['name'],
-    #                             channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-    #     # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-    #     #                         [[channel_dict['latitude'], channel_dict['longitude'],
-    #     #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
-    #     # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-    #     #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
-
-    #     # Check fields of the channels  
-    #     fields_of_channel = self.view_channel_fields()
 
     # Method to return the flow control to the main channel menu
     def doNothing(self):
@@ -108,9 +90,9 @@ class Channel:
     # Method to update channel fields
     def update_channels_information(self):
 
+        message = 'Channel information updated'
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
-        # print(str_modify_message)
 
         i = Utils.endless_terminal(message=str_modify_message, menu=self.channel_name, only_string=True)
 
@@ -184,12 +166,12 @@ class Channel:
             req = ThingSpeak.update_channel_information(self.id, updated_information)
             if req.status_code == 200:
                 self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-                print("Canal actualizado")
-                Utils.wait(2)
+                Utils.give_response(message=message, status=True)
                 return ''
+            else:
+                Utils.give_response(message=message, status=False)
         else:
-            print("Mensaje error has introducido campos que no existen.")
-            Utils.wait(2)
+            Utils.give_response(message=message + '. You entered some name value wrong.', status=False)
             return ''
 
 

@@ -95,7 +95,6 @@ def field_menu(ts, channel, index, field_name):
             break
 
         field_operation = options_dict[option]()
-        input(field_operation)
         if field_operation == 'actualizar':
             field.read_data_from_field()
 

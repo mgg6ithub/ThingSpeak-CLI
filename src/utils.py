@@ -42,7 +42,6 @@ class Utils:
         return tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center", colalign=("center",))
 
 
-
     # Wait method
     @staticmethod
     def wait(t=None, filename=None):
@@ -107,6 +106,21 @@ class Utils:
     # Metodo para convertir una lista a un objeto json
     def list_to_json(lista):
         return json.dumps(lista)
+    
+
+    @staticmethod
+    # Method to give the client a status response CORRECT|ERROR
+    def give_response(message=None, status=True):
+
+        if message:
+            print(message, end='')
+
+        if status:
+            print(Fore.GREEN + " successfull." + Fore.WHITE)
+            Utils.wait(2)
+        else:
+            print(Fore.RED + " error." + Fore.WHITE)
+            Utils.wait(2)
 
 
     @staticmethod
@@ -176,20 +190,21 @@ class Utils:
     # @wait_decorator
     def create_csv(field_data_table, file_name, data, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".csv"
-
-        with open(store_path, "w") as file:
+        
+        try:
+            with open(store_path, "w") as file:
             # file.write("\t" + "   PRUEBA\n")
             # file.write("{:<12}{:<12}{}\n".format("Date", "Time", "Value"))
-            for row in data:
-                if date_format == '1':
-                    file.write(row['created_at'] + "\t" + row[f'field' + field_index] + "\n")
-                else:
-                    date, t = Utils.format_date(row['created_at']).split(" ")
-                    file.write(date + "\t" + t + "\t" + row[f'field' + field_index] + "\n")
+                for row in data:
+                    if date_format == '1':
+                        file.write(row['created_at'] + "\t" + row[f'field' + field_index] + "\n")
+                    else:
+                        date, t = Utils.format_date(row['created_at']).split(" ")
+                        file.write(date + "\t" + t + "\t" + row[f'field' + field_index] + "\n")
+            Utils.give_response(message="File created", status=True)        
+        except Exception as e:
+            Utils.give_response(message="File created " + str(e), status=False)
 
-
-        print('file created')
-        time.sleep(2)
 
     # Method to create a row in a excel sheet with given data
     def insert_row_in_sheet(ws, fila, datos):
