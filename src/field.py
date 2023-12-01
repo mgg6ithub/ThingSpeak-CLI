@@ -184,24 +184,25 @@ class Field:
     #   .cvs
     #   .txt
     def download_data(self):
+        Utils.clear()
         file_name = str(input("Enter the file name: "))
 
-        date_format = input('Select the date format: \n'\
-            '1\t->\tThingSpeakAPI dateformat\t2018-06-14T12:12:22\tdata\n' \
-            '2\t->\t3 Columns date and time \t2018-06-14\t12:12:22\tdata'
-        )
+        date_format = str(input('Select the date format: \n'\
+            '1 -> 2018-06-14T12:12:22\n' \
+            '2 -> 2018-06-14 12:12:22\n'
+        ))
 
         format_options = {
-            "xlsx": Utils.create_xlsx,
-            "csv": Utils.create_csv,
-            "txt": Utils.create_txt
+            "1": Utils.create_xlsx,
+            "2": Utils.create_csv,
+            "3": Utils.create_txt
         }
 
-        str_banner_choose_format = "Choose file format for downloading the data.\n\n" \
-                    "1 -- xlsx\n" \
-                    "2 -- csv\n" \
-                    "3 -- txt\n"
-        selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()))
+        str_banner_choose_format = "Choose file format for downloading the data:\n\n" \
+                    "1 -> xlsx\n" \
+                    "2 -> csv\n" \
+                    "3 -> txt\n"
+        selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()), clear=True)
 
         format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index, date_format)
 

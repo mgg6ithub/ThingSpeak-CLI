@@ -9,12 +9,11 @@ class ThingSpeak:
 
 
     # Method to print the overall information of a channel
-    # Name  Id
     def print_channel_index(self, channels):
         Utils.clear()
         indexes = {}
         cont = 1
-        print("Nº\t\t\tID\t\t\tNOMBRE CANAL")
+        print("Nº\t\t\tID\t\t\tCHANNEL NAME")
         print("- \t\t\t--\t\t\t------------")
         for c in channels:
             print(str(cont) + "\t\t\t" + str(c['id']) + "\t\t\t" + c['name'] + "\n")
@@ -24,11 +23,6 @@ class ThingSpeak:
 
 
     # Method to obtain all the channels from the logged account
-    # {'id': 2299146, 'name': 'Canal1', 'description': 'Esta es la descripcion del canal 1',
-    # 'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
-    # 'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
-    # 'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
-    # 'write_flag': True}, {'api_key': '97NQ78KHK1PK7RP7', 'write_flag': False}]}
     def get_account_info(self):
         req = self.get_channels_list()
 
@@ -129,26 +123,32 @@ class ThingSpeak:
     @staticmethod
     def create_channel(user_api_key):
         Utils.clear()
-        nombre = str(input("Enter the new channel name: "))
-
+        name = str(input("Enter the new channel name: "))
+        public_flag = str(input("Enter the public flag of the channel. [True] to make it public. [False] to make it private: "))
+        
         # ADD SOME MORE PROMPTS INPUT TO CREATE THE CHENNELS WITH CUSTOM INFO
 
-        body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{nombre}',
-                'description': 'Esta es la descripcion del canal 1',
-                'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
-                'last_entry_id': None, 'public_flag': False, 'url': None, 'ranking': 50, 'metadata': '',
-                'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
-                                                                            'write_flag': True},
-                                                                            {'api_key': '97NQ78KHK1PK7RP7',
-                                                                            'write_flag': False}]}
+        if public_flag.__eq__('True') or public_flag.__eq__('False'):
+        
+            body = {"api_key": user_api_key, 'id': 2299146, 'name': f'{name}',
+                    'description': 'Esta es la descripcion del canal 1',
+                    'latitude': '0.0', 'longitude': '0.0', 'created_at': '2023-10-10T19:58:50Z', 'elevation': '',
+                    'last_entry_id': None, 'public_flag': public_flag, 'url': None, 'ranking': 50, 'metadata': '',
+                    'license_id': 0, 'github_url': None, 'tags': [], 'api_keys': [{'api_key': 'ZCRD02RYHN5Y8CXT',
+                                                                                'write_flag': True},
+                                                                                {'api_key': '97NQ78KHK1PK7RP7',
+                                                                                'write_flag': False}]}
 
-        r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
+            r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
 
-        if r.status_code == 200:
+            if r.status_code == 200:
+                Utils.give_response(message=f'New {public_flag} channel {name} created', clear=True, status=True)
+            else:
+                Utils.give_response(message=f'New {public_flag} channel {name} created', clear=True, status=False)
+        else:
             Utils.clear()
-            print(f'New channel {nombre}' + Fore.GREEN  + ' successfully' + Fore.WHITE + 'created' )
-            Utils.wait(2)
-
+            print('Make sure to enter [True/False] in the public flag field.')
+            Utils.wait(3)
 
     # Method to update information of the channel
     @staticmethod

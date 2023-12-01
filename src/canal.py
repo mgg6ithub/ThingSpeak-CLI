@@ -6,9 +6,6 @@ from tabulate import tabulate
 import pdb
 import re
 
-# {'channel': {'id': 2338528, 'name': 'aethelflaed', 'description': 'Esta es la descripcion del canal 1', 'latitude': 
-#              '0.0', 'longitude': '0.0', 'field1': 'CPU & RAM', 'field2': 'Temperature sensor 1', 
-#              'created_at': '2023-11-08T22:47:43Z', 'updated_at': '2023-11-09T08:32:15Z', 'last_entry_id': 14}, 
 
 class Channel:
     def __init__(self, user_api_key, index, channel_dict, channel_name):
@@ -31,21 +28,10 @@ class Channel:
             "url",
         ]
 
-    # Method to print channels
-    # def print_channel(self, index, channel_dict):
-    #     Utils.clear()
 
-    #     Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
-    #                             [[f" Channel {index} ", channel_dict['name'],
-    #                             channel_dict['id'], Utils.format_date(channel_dict['created_at']), channel_dict['description']]])
-    #     # Utils.printFormatedTable(["LATITUDE", "LONGITUDE", "ELEVATION", "LAST ENTRY"],
-    #     #                         [[channel_dict['latitude'], channel_dict['longitude'],
-    #     #                         channel_dict['elevation'], channel_dict['last_entry_id']]])
-    #     # Utils.printFormatedTable(["WRITE API KEY", "READ API KEY"],
-    #     #                         [[channel_dict['api_keys'][0]['api_key'], channel_dict['api_keys'][1]['api_key']]])
-
-    #     # Check fields of the channels  
-    #     fields_of_channel = self.view_channel_fields()
+    # Method to return the flow control to the main channel menu
+    def doNothing(self):
+        pass
 
     # Method to create the channel resume table
     def create_channel_resume_table(self):
@@ -73,7 +59,7 @@ class Channel:
         # Last entry
         # rankig (Porcentaje completado del canal)
         # license_id
-
+        self.channel_name = self.channel_dict['name']
         data = {
             "name": self.channel_dict['name'],
             "description": self.channel_dict['description'],
@@ -97,49 +83,76 @@ class Channel:
         
 
     def display_more_channel_info(self):
-        input("FUNCIONA MORE INFOR DESPLEGAR KEYS")
-
+        table = Utils.printFormatedTable(["PERCENTAGE COMPLETED","CREATED DATE", "WRITE API KEY", "READ API KEY", "LAST ENTRY"],
+                                [["%" + str(self.channel_dict['ranking']), self.channel_dict['created_at'],self.write_api_key, self.read_api_key, self.channel_dict['last_entry_id']]])
+        return table
 
     # Method to update channel fields
     def update_channels_information(self):
 
+        message = 'Channel information updated'
         str_modify_message = "\nExample\n" \
                             "ts> name:NEW CHANNEL NAME,tags:tag1,tag2,tag3,description:This is the new description"
-        print(str_modify_message)
 
-        i = str(input("se ejecuta> "))
+        i = Utils.endless_terminal(message=str_modify_message, menu=self.channel_name, only_string=True)
 
-        tags_list = []
-        tags_end_valid_word = ''
-        input_string_tags_removed = ''
-        updated_information = {"api_key": self.user_api_key}
-        #COMPROBAR SI HAY TAGS PARA FORMATEAR LA CADENA Y OBTENER TODAS
-        if 'tags' in i:
-            tags_string = i.split('tags:')[1].split(',')
+        # CHECK INPUT VALUES
+        input_values = i.split(',')
+        flag = True
+        for value in input_values:
+            if ':' in value:
+                v = value.split(':')[0]
+                # input(v)
+                if v not in self.valid_channel_information_fields:
+                    flag = False
 
-            for tag in tags_string:
-                if ':' in tag:
-                    tags_end_valid_word = tag.split(':')[0]
-                    break
-                tags_list.append(tag)
-            #COMPROBAR SI HAY MAS COSAS DELANTE DE TAGS Y DETRAS
-            first_part = ''
-            second_part = ''
-            first_part = i.split('tags:')[0]
+        if flag:
+            tags_list = []
+            tags_end_valid_word = ''
+            input_string_tags_removed = ''
+            updated_information = {"api_key": self.user_api_key}
+            #COMPROBAR SI HAY TAGS PARA FORMATEAR LA CADENA Y OBTENER TODAS
+            if 'tags' in i:
+                tags_string = i.split('tags:')[1].split(',')
 
-            if tags_end_valid_word: # Si hay un valid word despues de las tags es que hay mas valores
-                second_part = i.split(tags_end_valid_word)[1]
+                for tag in tags_string:
+                    if ':' in tag:
+                        tags_end_valid_word = tag.split(':')[0]
+                        break
+                    tags_list.append(tag)
 
-            input_string_tags_removed = first_part + tags_end_valid_word + second_part
+                #COMPROBAR SI HAY MAS COSAS DELANTE DE TAGS Y DETRAS
+                first_part = ''
+                second_part = ''
+                first_part = i.split('tags:')[0]
 
-            # SI SOLO HAY TAGS
-            if input_string_tags_removed == '': # Solamente se ha introducido tags
-                updated_information['tags'] = ','.join(tags_list)
-            else: # hay mas cosas aparte de tags
-                if second_part == '':
-                    input_string_tags_removed = input_string_tags_removed.rstrip(',')
+                if tags_end_valid_word: # Si hay un valid word despues de las tags es que hay mas valores
+                    second_part = i.split(tags_end_valid_word)[1]
 
-                entries = input_string_tags_removed.split(",")
+                input_string_tags_removed = first_part + tags_end_valid_word + second_part
+
+                # SI SOLO HAY TAGS
+                if input_string_tags_removed == '': # Solamente se ha introducido tags
+                    updated_information['tags'] = ','.join(tags_list)
+                else: # hay mas cosas aparte de tags
+                    if second_part == '':
+                        input_string_tags_removed = input_string_tags_removed.rstrip(',')
+
+                    entries = input_string_tags_removed.split(",")
+                    for entry in entries:
+                        key, value = entry.split(":", 1)
+                        key = key.strip()  # Asegúrate de que no haya espacios en blanco
+                        value = value.strip()  # Asegúrate de que no haya espacios en blanco
+
+                        if key in self.valid_channel_information_fields:
+                            updated_information[key] = value
+                        else:
+                            return False
+                    if tags_list:
+                        updated_information['tags'] = ','.join(tags_list)
+            # SI NO HAY TAGS SE PROCEDE NORMAL
+            else:
+                entries = i.split(",")
                 for entry in entries:
                     key, value = entry.split(":", 1)
                     key = key.strip()  # Asegúrate de que no haya espacios en blanco
@@ -149,26 +162,17 @@ class Channel:
                         updated_information[key] = value
                     else:
                         return False
-                if tags_list:
-                    updated_information['tags'] = ','.join(tags_list)
-        # SI NO HAY TAGS SE PROCEDE NORMAL
+
+            req = ThingSpeak.update_channel_information(self.id, updated_information)
+            if req.status_code == 200:
+                self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
+                Utils.give_response(message=message, status=True)
+                return ''
+            else:
+                Utils.give_response(message=message, status=False)
         else:
-            entries = i.split(",")
-            for entry in entries:
-                key, value = entry.split(":", 1)
-                key = key.strip()  # Asegúrate de que no haya espacios en blanco
-                value = value.strip()  # Asegúrate de que no haya espacios en blanco
-
-                if key in self.valid_channel_information_fields:
-                    updated_information[key] = value
-                else:
-                    return False
-
-        req = ThingSpeak.update_channel_information(self.id, updated_information)
-        if req.status_code == 200:
-            self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-            print("Canal actualizado")
-            Utils.wait(2)
+            Utils.give_response(message=message + '. You entered some name value wrong.', status=False)
+            return ''
 
 
     # Method to get the fields of the channel
@@ -326,27 +330,27 @@ class Channel:
 
     # Method to clear all the data from all channel fields
     def clear_data_from_all_fields(self):
+        message = 'Channel data deleted'
         Utils.clear()
-        i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=True)
+        i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=False)
         if i == 'y':
             res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
             if res.status_code == 200:
-                Utils.clear()
-                print("All the data from fields deleted.")
-                Utils.wait()
+                Utils.give_response(message=message, clear=True, status=True)
                 return 'reset'
             else:
-                print(res.status_code)
-                input()
-
+                Utils.give_response(message=message, clear=True, status=False)
+        else:
+            return 'n'
 
     # Method to delet the channel
     def delete_channel(self):
-        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
+        message = f'Channel {self.channel_name} deleted'
+        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ",clear=True, tty=False)
         if i == "y":
             req = ThingSpeak.remove_channel(self.id, self.user_api_key)
             if req.status_code == 200:
-                Utils.clear()
-                print("Channel successfully deleted!")
-                Utils.wait(2)
+                Utils.give_response(message=message, clear=True, status=True)
                 return 'reset'
+            else:
+                Utils.give_response(message=message, clear=True, status=False)
