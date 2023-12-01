@@ -98,50 +98,47 @@ class Field:
 
     # Method to upload a csv data
     def upload_csv(self):
-        path_file = input('Enter the csv file path: ')
+
+        path_file = str(input('Enter the csv file path: '))
 
         # check the date defualt no dateformat absolute
+        input(path_file)
 
         with open(path_file, 'r') as file:
-            # csv_reader = csv.reader(file, delimiter='\t')
-            # next(csv_reader)
-
-            # updates = ''
-            # for row in csv_reader:
-            #     timestamp = f'{row[0]} {row[1]}'
-            #     field2_value = row[2]
-            #     updates += f'{timestamp},{field2_value},,,,,,,,|'
             
-            striped_data = [word.strip().split('\t')[2] for word in file.readlines()]
+            pattern = r"(\d+)[\s\,\|\-]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})[\s\,\|\-]+(\d+(\.\d+)?)"
+
+            # striped_data = [word.strip().split('\t')[2] for word in file.readlines()]
 
             # Crear la cadena de actualización para ThingSpeak
             string_template = '0,,,,,,,,,,,,ok|'
 
             bulk_data = ""
-            for index, row_data in enumerate(striped_data):
-                lista = string_template.split(',')
-                lista[0] = str(index)
-                lista[int(self.field_index)] = row_data
-                temp_template = ','.join(lista)
+            for index, row_data in enumerate(file):
+                # print(row_data)
+                # input(re.match(pattern, row_data))
+                if re.match(pattern, row_data):
+                    lista = string_template.split(',')
+                    lista[0] = str(index)
+                    lista[int(self.field_index)] = row_data.split('\t')[2].strip()
+                    temp_template = ','.join(lista)
 
-                bulk_data += temp_template
+                    bulk_data += temp_template
 
-                if index == len(striped_data) - 1:
-                    if bulk_data.endswith('|'):
-                        bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
-                        break
+                    # if index == len(file) - 1:
+                    #     if bulk_data.endswith('|'):
+                    #         bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
+                    #         break
 
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
                 'time_format': 'relative',
-                'updates': bulk_data #.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
+                'updates': bulk_data .rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
 
-            input(data_to_send)
-            # Convertir datos a formato adecuado para el cuerpo de la solicitud
-            # body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
-            ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
+            r = ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
+            input(r.status_code)
             return 'actualizar'
 
 
@@ -219,7 +216,7 @@ class Field:
                 row.append(time)
             row.append(value)
             data.append(row)
-        input(data)
+
         format_options[selected_option](data, file_name, self.field_index, date_format)
 
 
