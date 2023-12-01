@@ -330,27 +330,27 @@ class Channel:
 
     # Method to clear all the data from all channel fields
     def clear_data_from_all_fields(self):
+        message = 'Channel data deleted'
         Utils.clear()
-        i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=True)
+        i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=False)
         if i == 'y':
             res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
             if res.status_code == 200:
-                Utils.clear()
-                print("All the data from fields deleted.")
-                Utils.wait()
+                Utils.give_response(message=message, clear=True, status=True)
                 return 'reset'
             else:
-                print(res.status_code)
-                input()
-
+                Utils.give_response(message=message, clear=True, status=False)
+        else:
+            return 'n'
 
     # Method to delet the channel
     def delete_channel(self):
-        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ", tty=False)
+        message = f'Channel {self.channel_name} deleted'
+        i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ",clear=True, tty=False)
         if i == "y":
             req = ThingSpeak.remove_channel(self.id, self.user_api_key)
             if req.status_code == 200:
-                Utils.clear()
-                print("Channel successfully deleted!")
-                Utils.wait(2)
+                Utils.give_response(message=message, clear=True, status=True)
                 return 'reset'
+            else:
+                Utils.give_response(message=message, clear=True, status=False)

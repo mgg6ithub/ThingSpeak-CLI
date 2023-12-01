@@ -198,8 +198,7 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
         channel_option = options_dict[option]()
 
         # Refresh
-        if option == '3' or option == '4' and channel_option == 'reset':
-            input("Reseting")
+        if channel_option != 'n' and option == '3' or option == '4' and channel_option == 'reset':
             ts.get_account_info()
             break
 

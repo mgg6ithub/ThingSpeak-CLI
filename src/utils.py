@@ -11,6 +11,7 @@ from datetime import datetime
 import pdb
 import pandas as pd
 import openpyxl
+import re
 
 # Define la variable global
 clear_command = "cls" if platform.system() == "Windows" else "clear"
@@ -23,8 +24,8 @@ class Utils:
         self.clear_command = "cls" if platform.system() == "Windows" else "clear"
 
 
-    @staticmethod
     # Clear screen method
+    @staticmethod
     def clear():
         return_code = os.system(clear_command)
         if return_code != 0:
@@ -42,8 +43,8 @@ class Utils:
         return tabulate([tableHeaders, *tableData], headers="firstrow", tablefmt="rounded_grid", stralign="center", colalign=("center",))
 
 
-    # Wait method
     @staticmethod
+    # Wait method
     def wait(t=None, filename=None):
         try:
             if t is None:
@@ -65,16 +66,16 @@ class Utils:
         print("\x1b[?25h")  # shown
 
 
-    @staticmethod
     # Wait and hide cursor
+    @staticmethod  
     def wait_animation(time_to_wait):
         Utils.hide_cursor()
         Utils.wait(time_to_wait)
         Utils.show_cursor()
 
 
-    @staticmethod
     # Endless ThingSpeak-CLI terminal
+    @staticmethod
     def endless_terminal(message, *options, help_message=None, menu=None, menu1=None, clear=False, tty=True, exit=False, only_string=False):
 
         if clear:
@@ -102,15 +103,18 @@ class Utils:
                 return i                
 
 
-    @staticmethod
     # Metodo para convertir una lista a un objeto json
+    @staticmethod
     def list_to_json(lista):
         return json.dumps(lista)
     
 
-    @staticmethod
     # Method to give the client a status response CORRECT|ERROR
-    def give_response(message=None, status=True):
+    @staticmethod
+    def give_response(message=None, clear=False, status=True):
+        
+        if clear:
+            Utils.clear()
 
         if message:
             print(message, end='')
@@ -123,8 +127,8 @@ class Utils:
             Utils.wait(2)
 
 
-    @staticmethod
     # Method to make http requests
+    @staticmethod
     def make_request(**kwargs):
         try:
             r = requests.request(**kwargs)
@@ -163,31 +167,38 @@ class Utils:
         time = date.split("T")[1].split("Z")[0]
         return str(ymd) + " " + str(time)
 
-
-    # Decorador wait
-    @staticmethod
-    def wait_decorator(func):
-        def wrapper(*args, **kwargs):
-            Utils.wait()  # Llama a Utils.wait sin proporcionar un valor específico para t
-            return func(*args, **kwargs)
-        return wrapper
-
-
     #
     # Methods to download data and create different file formats
     #
 
     # Method to create a simple .txt with the retrieved data
-    @wait_decorator
-    def create_txt(field_data_table, file_name, data, field_index):
-        store_path = os.getcwd() + "/" + file_name + ".txt"
+    def create_txt(field_data_table, file_name, data, field_index, date_format):
+        save_path = os.getcwd() + "/" + file_name + ".txt"
+        
+        try:
+            if date_format == '1':
+                pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
 
-        with open(store_path, "w", encoding="utf-8") as file:
-            file.write(field_data_table)
+                coincidencias = re.findall(pattern, field_data_table)
+
+                all_rows = []
+                for index, date, time, value in coincidencias:
+                    row = []
+                    row.append(index)
+                    row.append(date + 'T' + time)
+                    row.append(value)
+                    all_rows.append(row)
+
+                field_data_table = tabulate(all_rows, tablefmt='rounded_grid')
+
+                with open(save_path, "w", encoding="utf-8") as file:
+                    file.write(field_data_table)
+                Utils.give_response(message="File created", status=True)  
+        except Exception as e:
+            Utils.give_response(message=f"File created {str(e)}", status=True)  
 
 
     # Method to create a simple .csv file with the field data
-    # @wait_decorator
     def create_csv(field_data_table, file_name, data, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".csv"
         
@@ -203,7 +214,7 @@ class Utils:
                         file.write(date + "\t" + t + "\t" + row[f'field' + field_index] + "\n")
             Utils.give_response(message="File created", status=True)        
         except Exception as e:
-            Utils.give_response(message="File created " + str(e), status=False)
+            Utils.give_response(message=f"File created {str(e)}", status=False)
 
 
     # Method to create a row in a excel sheet with given data
@@ -219,28 +230,28 @@ class Utils:
 
 
     # Method to create a xlsx file for excel
-    @wait_decorator
-    def create_xlsx(field_data_table, file_name, data, field_index):
+    def create_xlsx(field_data_table, file_name, data, field_index, date_format):
         store_path = os.getcwd() + "/" + file_name + ".xlsx"
 
         try:
             wb = openpyxl.load_workbook(store_path)
+            ws = wb.active
+            ws.title = file_name
+
+            # ws.merge_cells('A1:C1')
+            # ws['A1'] = "PRUEBA"
+            # Utils.introducir_fila_excel(ws, 1, "PRUEBA")
+            # Utils.insert_row_in_sheet(ws, 2, ["Date", "Time", "Value"])
+
+            row = 3
+            for data_row in data:
+                datetime = Utils.format_date(data_row['created_at'])
+                date, time = datetime.split(" ")
+                Utils.insert_row_in_sheet(ws, row, [date, time, data_row[f'field' + field_index]])
+                row += 1
+
+            wb.save(file_name + ".xlsx")
+            Utils.give_response(message=f"File created", status=True)
         except FileNotFoundError:
             wb = openpyxl.Workbook()
-
-        ws = wb.active
-        ws.title = file_name
-
-        ws.merge_cells('A1:C1')
-        ws['A1'] = "PRUEBA"
-        # Utils.introducir_fila_excel(ws, 1, "PRUEBA")
-        Utils.insert_row_in_sheet(ws, 2, ["Date", "Time", "Value"])
-
-        row = 3
-        for data_row in data:
-            datetime = Utils.format_date(data_row['created_at'])
-            date, time = datetime.split(" ")
-            Utils.insert_row_in_sheet(ws, row, [date, time, data_row[f'field' + field_index]])
-            row += 1
-
-        wb.save(file_name + ".xlsx")
+            Utils.give_response(message=f"File created", status=False)
