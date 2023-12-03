@@ -84,11 +84,11 @@ from tabulate import tabulate
 
 
 
-with open('todo.csv', 'r') as file:
-    pattern = r"(\d+)[\s\,\|\-]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})[\s\,\|\-]+(\d+(\.\d+)?)"
+# with open('todo.csv', 'r') as file:
+#     pattern = r"(\d+)[\s\,\|\-]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})[\s\,\|\-]+(\d+(\.\d+)?)"
     
-    for row in file:
-        match = re.match(pattern, row)
-        print(match.groups)
+#     for row in file:
+#         match = re.match(pattern, row)
+#         print(match.groups.)
     # for row in file.readlines():
         

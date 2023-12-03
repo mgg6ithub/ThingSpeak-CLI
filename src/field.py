@@ -10,20 +10,6 @@ import keyboard
 import csv
 import re
 
-# 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:27Z', 'entry_id': 3, 'field1': '0.4', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:43Z', 'entry_id': 4, 'field1': '0.3', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:59Z', 'entry_id': 5, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:50:14Z', 'entry_id': 6, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:50:30Z', 'entry_id': 7, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-09T16:13:33Z', 'entry_id': 8, 'field1': None, 'field2': '0.1'}, 
-#            {'created_at': '2023-11-09T16:13:49Z', 'entry_id': 9, 'field1': None, 'field2': '0.3'}, 
-#            {'created_at': '2023-11-09T16:14:04Z', 'entry_id': 10, 'field1': None, 'field2': '0.2'}, 
-#            {'created_at': '2023-11-09T16:14:20Z', 'entry_id': 11, 'field1': None, 'field2': '0.3'}, 
-#            {'created_at': '2023-11-09T16:14:35Z', 'entry_id': 12, 'field1': None, 'field2': '0.4'}, 
-#            {'created_at': '2023-11-09T16:14:51Z', 'entry_id': 13, 'field1': None, 'field2': '0.2'}, 
-#            {'created_at': '2023-11-09T16:15:06Z', 'entry_id': 14, 'field1': None, 'field2': '0.2'}]}
 
 class Field:
 
@@ -44,6 +30,7 @@ class Field:
         res = ThingSpeak.get_feeds_from_field(self.channel_id, self.field_index, self.read_key)
         if res.status_code == 200:
             return res.json()['feeds']
+
 
     # Method to read data from a especific field
     def read_data_from_field(self):
@@ -86,23 +73,11 @@ class Field:
                 "field" + self.field_index: cpu
             })
 
-# # BUILT THE QUERY STRING
-        # query_string = '&'.join([f'field{self.field_index}={value}' for value in data_values])
-        # response = ThingSpeak.upload_data_from_csv_file(self.write_key, query_string)
-        # write_api_key=KKRLJNAXF86OLCPI&time_format=absolute&updates=2023-11-11 17:42:11,0.3,,,,,,,,|
-        # 2023-11-11 17:42:27,0.3,,,,,,,,|2023-11-11 17:42:42,0.3,,,,,,,,|
-        # 2023-11-11 17:42:58,0.3,,,,,,,,|2023-11-11 17:43:13,0.4,,,,,,,,|
-        # 2023-11-11 17:43:29,0.3,,,,,,,,|2023-11-11 17:43:45,0.4,,,,,,,,|
-        # 2023-11-11 17:44:00,0.3,,,,,,,,|2023-11-11 17:44:15,0.4,,,,,,,,|
-        # 2023-11-11 17:44:31,0.2,,,,,,,,
 
-    # Method to upload a csv data
     def upload_csv(self):
-
+        
+        message = 'Upload csv file'
         path_file = str(input('Enter the csv file path: '))
-
-        # check the date defualt no dateformat absolute
-        input(path_file)
 
         with open(path_file, 'r') as file:
             
@@ -133,13 +108,19 @@ class Field:
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
-                'time_format': 'relative',
+                'time_format': 'absolute',
                 'updates': bulk_data .rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
-
+            input(data_to_send)
             r = ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
+            input(type(r.status_code))
             input(r.status_code)
-            return 'actualizar'
+            if r.status_code == 202:
+                Utils.give_response(message=message, clear=True, status=True)
+                Utils.wait(10)
+                return 'actualizar'
+            else:
+                Utils.give_response(message=message, clear=True, status=False)
 
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos

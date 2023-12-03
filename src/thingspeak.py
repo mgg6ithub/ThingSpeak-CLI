@@ -150,6 +150,7 @@ class ThingSpeak:
             print('Make sure to enter [True/False] in the public flag field.')
             Utils.wait(3)
 
+    
     # Method to update information of the channel
     @staticmethod
     def update_channel_information(channel_id, updated_information):
