@@ -102,7 +102,8 @@ def field_menu(ts, channel, index, field_name):
 def fields_selector(ts, channel):
     pattern = re.compile(r"^[1-8]$")
 
-    str_field_list_commands_help = "create field\tTo create a new field. Up to 8 fields in total.\n" \
+    str_field_list_commands_help = "Select a field by entering his index.\n" \
+    "create field\tTo create a new field. Up to 8 fields in total.\n" \
     "rename field\tRename a field and give it a new name.\n" \
     "clear fields\tClear all the data from all the fields.\n" \
     "delete field\tDelete a existing field.\n" \
@@ -135,10 +136,12 @@ def fields_selector(ts, channel):
         # field has been selected
         if pattern.match(field_menu_option):
             field_menu(ts, channel, field_menu_option, channel.get_field_name(int(field_menu_option)))
+        
+        options_dict[field_menu_option]()
 
-        # option in field list has been selected (help, create field, delete field, ...)
-        if field_menu_option in options_dict:
-            options_dict[field_menu_option]()
+        # # option in field list has been selected (help, create field, delete field, ...)
+        # if field_menu_option in options_dict:
+        #     options_dict[field_menu_option]()
 
 
 # Method to control the flow of a selected channel

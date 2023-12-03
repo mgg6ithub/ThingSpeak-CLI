@@ -100,11 +100,6 @@ class Field:
 
                     bulk_data += temp_template
 
-                    # if index == len(file) - 1:
-                    #     if bulk_data.endswith('|'):
-                    #         bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
-                    #         break
-
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
@@ -112,9 +107,10 @@ class Field:
                 'updates': bulk_data .rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
             input(data_to_send)
+
             r = ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
-            input(type(r.status_code))
-            input(r.status_code)
+            input(r.headers)
+            input(r.content)
             if r.status_code == 202:
                 Utils.give_response(message=message, clear=True, status=True)
                 Utils.wait(10)

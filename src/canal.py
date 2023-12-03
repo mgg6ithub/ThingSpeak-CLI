@@ -247,6 +247,7 @@ class Channel:
         Utils.clear()
         new_field_dict = {"api_key": self.user_api_key}
         field_name = input("Enter the new field name: ")
+        message = f'New field [{field_name}] created'
         fields = self.get_channel_fields()
 
         if fields is None:
@@ -268,8 +269,10 @@ class Channel:
         req = ThingSpeak.create_one_field_for_channel(new_field_dict, self.id)
 
         if req.status_code == 200:
-            print(f"New field {field_name} created.")
-            time.sleep(2)
+            Utils.give_response(message=message, clear=True, status=True)
+            return
+        Utils.give_reponse(message=message, clear=True, status=False)
+
 
 
     # Method to rename a field
@@ -277,6 +280,7 @@ class Channel:
         selected_index = Utils.endless_terminal(self.table_of_fields + "\n\nSelect the index of the field you want to delete.", *self.valid_field_indexes)
         new_name = str(input("Enter the new name: "))
         remove_field = {"api_key": self.user_api_key}
+        message = f'Renamed with [{new_name}]'
 
         for i in self.valid_field_indexes:
             if i == selected_index:
@@ -285,9 +289,10 @@ class Channel:
         req = ThingSpeak.create_one_field_for_channel(remove_field, self.id)
         
         if req.status_code == 200:
-            print(f"Field renamed.")
-            time.sleep(2)
-
+            Utils.give_response(message=message, clear=True, status=True)
+            return
+        Utils.give_response(message=message, clear=True, status=False)
+        
 
     def delete_one_field():
         pass
@@ -295,6 +300,7 @@ class Channel:
 
     # Method to create fields from a channel
     def create_fields_in_channel(self):
+        message = 'New field'
         cont = 1
         i = None
         new_fields = {"api_key": self.user_api_key}
@@ -309,8 +315,7 @@ class Channel:
         req = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
                                 json=new_fields)
         if req.status_code == 200:
-            print("New fields created.")
-            time.sleep(2)
+            Utils.give_response(meesage="")
 
 
     # Method to remove all the fields from a channel
