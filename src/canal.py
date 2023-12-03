@@ -3,8 +3,6 @@ from src.utils import Utils
 import time
 from src.thingspeak import ThingSpeak
 from tabulate import tabulate
-import pdb
-import re
 
 
 class Channel:

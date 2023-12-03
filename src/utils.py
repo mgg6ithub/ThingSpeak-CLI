@@ -1,14 +1,13 @@
 
 import os
 import requests
-from requests.exceptions import HTTPError, ConnectionError, InvalidSchema, InvalidURL
+from requests.exceptions import InvalidSchema, InvalidURL
 import platform
 import time
 import json
 from colorama import Fore
 from tabulate import tabulate
 from datetime import datetime
-import pdb
 import pandas as pd
 import openpyxl
 import re

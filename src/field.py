@@ -4,10 +4,6 @@ from src.thingspeak import ThingSpeak
 import time
 import psutil
 from tabulate import tabulate
-from progress.bar import IncrementalBar
-from tqdm import tqdm
-import keyboard
-import csv
 import re
 
 
@@ -127,27 +123,6 @@ class Field:
 
         print(f"\rUSO DE LA CPU: |{cpu_carga}| {cpu:.2f}%", end="")
         print(f"\tUSO DE LA RAM: |{ram_carga}| {ram:.2f}%", end="\r")
-        # bar = IncrementalBar('Uploading data', max=100)
-            # for i in range(1,100):
-            #     time.sleep(0.2)
-            #     bar.next()
-            # bar.finish()
-
-            # total_iterations = 100
-
-            # # Crea una barra de progreso
-            # progress_bar = tqdm(total=total_iterations)
-
-            # # Itera a través de las tareas
-            # for i in range(total_iterations):
-            #     # Simula una tarea que toma un tiempo
-            #     time.sleep(0.5)  # Espera medio segundo
-
-            #     # Actualiza la barra de progreso
-            #     progress_bar.update(1)
-
-            # # Cierra la barra de progreso
-            # progress_bar.close()
 
 
     # Method to download the data of a given field
