@@ -8,10 +8,22 @@ import signal
 import sys
 import re
 
-#RAMA DEVELOP CREADA
+
+title = """
+11111010000010011010101010011100110011110100111110000000100101011100011100010110111111010110100100100110011111101000000001001
+11010010011111010111111000111100010010000100110101101110011000000000001101110010100011010001111111101100100000110001100001000
+11110100101001110110111101000111101100010000110011001101000110100011110010100100001000101011011111010010110010010111001111001
+00111011110011100010010000101001101001110110000011011011000000100100000100110001000010110000000111111100100001100100000101010
+01101110010000010001100110010110000010001010001000100100010010100000111010111110011111101010101011011111111110100010111010010
+00011000001011111100111101001001100111100001111101001111000101010011010000010010100111010111100001100011001011000100110001010
+110110010110000101110101111010010011101110110011001000011101101101110000001101110010011000010001000111011110001111000001
+"""
+
+input(title)
 
 # u = Utils()
 init()
+help_tail = "\nEnter help to see available commands.\nEnter \"b\" to go backwards."
 
 
 # Method to handle the exit of the program when ctrl + c is pressed
@@ -47,12 +59,13 @@ def checkUserApyKey(user_api_key):
 
 # Method to login
 def login():
-    while True:
-        Utils.clear()
-        str_banner = "1. login in with ThingSpeak web page CREDENTIALS.\n\n" \
+
+    str_banner = "1. login in with ThingSpeak web page CREDENTIALS.\n\n" \
                     "2. login with APY KEY.\n\n" \
                     "CTRL + C to exit the program at any time.\n"
-
+    
+    while True:
+        Utils.clear()
         option = Utils.endless_terminal(str_banner, "1", "2")
         Utils.clear()
 
@@ -82,7 +95,7 @@ def field_menu(ts, channel, index, field_name):
     }
     
     while True:
-        option = Utils.endless_terminal(field.field_data_table, *list(options_dict.keys()), help_message=Utils.get_help_str_template(options_dict), menu=channel.channel_name, menu1=field_name, clear=True)
+        option = Utils.endless_terminal("FIELD DATA\n----------\n" + field.field_data_table + "\n" + help_tail, *list(options_dict.keys()), help_message=Utils.get_help_str_template(options_dict), menu=channel.channel_name, menu1=field_name, clear=True)
     
         if option == 'b':
             break
@@ -102,6 +115,8 @@ def fields_selector(ts, channel):
         # "delete field": [channel.delete_one_field, # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
         # "delete all fields": channel.delete_all_fields # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
     }
+
+    str_field_header = "CHANNEL FIELDS\n--------------"
     
     while True:
         o = channel.print_channel_fields()
@@ -114,7 +129,7 @@ def fields_selector(ts, channel):
 
         valid_options = list(options_dict.keys()) + channel.valid_field_indexes
 
-        field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=Utils.get_help_str_template(options_dict, banner="Select a field by entering his index."), menu=channel.channel_name)
+        field_menu_option = Utils.endless_terminal(channel.table_of_fields + "\n\nSelect a field by entering his index." + help_tail, *valid_options, help_message=Utils.get_help_str_template(options_dict, banner=str_field_header), menu=channel.channel_name)
 
         if field_menu_option == 'b':
             break
@@ -124,7 +139,7 @@ def fields_selector(ts, channel):
             field_menu(ts, channel, field_menu_option, channel.get_field_name(int(field_menu_option)))
             continue
         
-        options_dict[field_menu_option]()
+        options_dict[field_menu_option][0]()
 
 
 # Method to control the flow of a selected channel
@@ -133,12 +148,15 @@ def fields_selector(ts, channel):
 def channel_menu(ts, user_api_key, i, indexes, channel_name):
     channel = Channel(user_api_key, i, indexes[i], channel_name)
 
+    str_header = "CHANNEL PREVIEW\n---------------\n"
+
     str_channel_help = "\n\nCHANNEL OPTIONS\n" \
-                            "------------------\n\n" \
+                            "---------------\n\n" \
                             "1 -- Channel information and settings\n\n" \
                             "2 -- Channel fields.\n\n" \
                             "3 -- Clear all channel data.\n\n" \
                             "4 -- Delete the channel.\n\n" \
+                            "Select a option by entering his index.\n" \
                             "Enter \"b\" to go backwards"
 
     options_dict = {
@@ -148,25 +166,31 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
         "4": channel.delete_channel
     }
 
+    update_menu_options_dict = {
+        "more info": [channel.display_more_channel_info, "Keys of the channel"],
+        "update info": [channel.update_channels_information, "Update a the channel information. Name, tags, etc..."]
+    }
+
+    str_info_header = "CHANNEL METADATA\n----------------"
+
     while True:
 
-        option = Utils.endless_terminal(channel.create_channel_resume_table() + str_channel_help, *list(options_dict.keys()), menu=channel.channel_name, clear=True)
+        option = Utils.endless_terminal(str_header + channel.create_channel_resume_table() + str_channel_help, *list(options_dict.keys()), menu=channel.channel_name, clear=True)
 
         if option == '1':
             
             more_info_table = ''
+            this_help_tail = help_tail
 
             while True:
-                
-                update_menu_options_dict = {
-                    "more info": [channel.display_more_channel_info, "Keys of the channel"],
-                    "update info": [channel.update_channels_information, "Update a the channel information. Name, tags, etc..."]
-                }
 
-                update_option = Utils.endless_terminal(channel.generate_channel_information_table() + '\n' + more_info_table, 
+                if more_info_table:
+                    this_help_tail = '\n'
+
+                update_option = Utils.endless_terminal(channel.generate_channel_information_table() + "\n" + this_help_tail + more_info_table, 
                                                        *list(update_menu_options_dict.keys()),
-                                                        help_message=Utils.get_help_str_template(update_menu_options_dict), 
-                                                        menu=channel.channel_name, clear=True)
+                                                        help_message=Utils.get_help_str_template(update_menu_options_dict, banner=str_info_header), 
+                                                        menu=channel.channel_name, clear=False)
 
                 if update_option == 'b':
                     break
@@ -190,12 +214,13 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
 def main_menu(user_api_key):
     ts = ThingSpeak(user_api_key)
 
-    while True:
-        if ts.hayCanales:
-            str_banner = "1 -- PUBLIC CHANNELS.\n\n" \
+    str_banner = "1 -- PUBLIC CHANNELS.\n\n" \
                         "2 -- PRIVATE CHANNELS.\n\n" \
                         "3 -- ALL CHANNELS.\n\n" \
                         "4 -- Create a new channel.\n" \
+
+    while True:
+        if ts.hayCanales:
 
             option = Utils.endless_terminal(str_banner, "1", "2", "3", "4", clear="yes")
 
@@ -213,7 +238,7 @@ def main_menu(user_api_key):
                 ts.get_account_info()
                 continue
 
-            i = Utils.endless_terminal("\nSelect a channel.\nOr enter \"b\" to go backwards.", *indexes.keys())
+            i = Utils.endless_terminal("\nSelect a channel by entering his index.\nEnter \"b\" to go backwards.", *indexes.keys())
 
             if i.__eq__('b'):
                 continue
