@@ -95,13 +95,6 @@ def field_menu(ts, channel, index, field_name):
 def fields_selector(ts, channel):
     pattern = re.compile(r"^[1-8]$")
 
-    # str_field_list_commands_help = "Select a field by entering his index.\n" \
-    # "create field\tTo create a new field. Up to 8 fields in total.\n" \
-    # "rename field\tRename a field and give it a new name.\n" \
-    # "clear fields\tClear all the data from all the fields.\n" \
-    # "delete field\tDelete a existing field.\n" \
-    # "delete all fields\tDelete all existing field and their data.\n"
-
     options_dict = {
         "create field": [channel.create_one_field, "Create a new field, up to 8 maximum."], # OK
         "rename field": [channel.rename_field_name, "Rename a field and give it a new name."], # OK
@@ -164,9 +157,6 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
             more_info_table = ''
 
             while True:
-
-                # str_help_channel_info = "more info\tKeys of the channel.\n" \
-                #                         "update info\tUpdate a the channel information. Name, tags, etc..."
                 
                 update_menu_options_dict = {
                     "more info": [channel.display_more_channel_info, "Keys of the channel"],
@@ -181,7 +171,7 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
                 if update_option == 'b':
                     break
 
-                more_info_table = update_menu_options_dict[update_option]()
+                more_info_table = update_menu_options_dict[update_option][0]()
 
         if option == 'b':
             break
