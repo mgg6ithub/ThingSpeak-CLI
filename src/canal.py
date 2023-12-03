@@ -33,6 +33,7 @@ class Channel:
     def doNothing(self):
         pass
 
+
     # Method to create the channel resume table
     def create_channel_resume_table(self):
         return Utils.printFormatedTable(["Nº", "NAME", "ID", "Created Date", "Description"],
@@ -80,12 +81,13 @@ class Channel:
 
         # Utilizar tabulate para mostrar la información en una tabla
         return tabulate(table_data, tablefmt="rounded_grid")
-        
+
 
     def display_more_channel_info(self):
         table = Utils.printFormatedTable(["PERCENTAGE COMPLETED","CREATED DATE", "WRITE API KEY", "READ API KEY", "LAST ENTRY"],
                                 [["%" + str(self.channel_dict['ranking']), self.channel_dict['created_at'],self.write_api_key, self.read_api_key, self.channel_dict['last_entry_id']]])
         return table
+
 
     # Method to update channel fields
     def update_channels_information(self):
@@ -166,12 +168,12 @@ class Channel:
             req = ThingSpeak.update_channel_information(self.id, updated_information)
             if req.status_code == 200:
                 self.channel_dict = ThingSpeak.get_channel_settings(self.id, self.user_api_key).json()
-                Utils.give_response(message=message, status=True)
+                Utils.give_response(message=message, status=200)
                 return ''
             else:
-                Utils.give_response(message=message, status=False)
+                Utils.give_response(message=message, status=201)
         else:
-            Utils.give_response(message=message + '. You entered some name value wrong.', status=False)
+            Utils.give_response(message=message + '. You entered some name value wrong.', status=201)
             return ''
 
 
@@ -227,7 +229,8 @@ class Channel:
                 return 'b'
 
         self.table_of_fields = tabulate(all_fields, tablefmt="rounded_grid")
-    
+
+
     # Method to get the name of a field giving the correpondant index
     def get_field_name(self, index):
 
@@ -238,15 +241,18 @@ class Channel:
             if i == index:
                 return self.channel_fields_names[i]
 
+
     #Method to select a field from the channel and create a new Field instance with it.
     def select_field(self):
         return Utils.endless_terminal(self.table_of_fields + "\n\nSelect a field by its index.\n", *self.valid_field_indexes)
+
 
     # Method to create fields
     def create_one_field(self):
         Utils.clear()
         new_field_dict = {"api_key": self.user_api_key}
         field_name = input("Enter the new field name: ")
+        message = f'New field [{field_name}] created'
         fields = self.get_channel_fields()
 
         if fields is None:
@@ -265,11 +271,9 @@ class Channel:
             available_field = "field" + str(cont)
             new_field_dict[available_field] = field_name
 
-        req = ThingSpeak.create_one_field_for_channel(new_field_dict, self.id)
+        res = ThingSpeak.create_one_field_for_channel(new_field_dict, self.id)
+        Utils.give_response(message=message, clear=True, status=res.status_code)
 
-        if req.status_code == 200:
-            print(f"New field {field_name} created.")
-            time.sleep(2)
 
 
     # Method to rename a field
@@ -277,40 +281,38 @@ class Channel:
         selected_index = Utils.endless_terminal(self.table_of_fields + "\n\nSelect the index of the field you want to delete.", *self.valid_field_indexes)
         new_name = str(input("Enter the new name: "))
         remove_field = {"api_key": self.user_api_key}
+        message = f'Renamed with [{new_name}]'
 
         for i in self.valid_field_indexes:
             if i == selected_index:
                 remove_field['field' + i] = new_name
         
-        req = ThingSpeak.create_one_field_for_channel(remove_field, self.id)
+        res = ThingSpeak.create_one_field_for_channel(remove_field, self.id)
+        Utils.give_response(message=message, clear=True, status=res.status_code)
         
-        if req.status_code == 200:
-            print(f"Field renamed.")
-            time.sleep(2)
-
 
     def delete_one_field():
         pass
 
 
-    # Method to create fields from a channel
-    def create_fields_in_channel(self):
-        cont = 1
-        i = None
-        new_fields = {"api_key": self.user_api_key}
+    # # Method to create fields from a channel
+    # def create_fields_in_channel(self):
+    #     message = 'New field'
+    #     cont = 1
+    #     i = None
+    #     new_fields = {"api_key": self.user_api_key}
 
-        while i is not "n" and cont <= 8:
-            print("Enter the name for the field: ")
-            new_fields["field" + str(cont)] = input("[" + str(cont) + "º campo]=")
-            cont += 1
-            print("Do you wan to create another field? [y/n]\n")
-            i = input("->")
+    #     while i is not "n" and cont <= 8:
+    #         print("Enter the name for the field: ")
+    #         new_fields["field" + str(cont)] = input("[" + str(cont) + "º campo]=")
+    #         cont += 1
+    #         print("Do you wan to create another field? [y/n]\n")
+    #         i = input("->")
 
-        req = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-                                json=new_fields)
-        if req.status_code == 200:
-            print("New fields created.")
-            time.sleep(2)
+    #     req = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
+    #                             json=new_fields)
+    #     if req.status_code == 200:
+    #         Utils.give_response(meesage="")
 
 
     # Method to remove all the fields from a channel
@@ -335,22 +337,15 @@ class Channel:
         i = Utils.endless_terminal("Are you sure you want to delete the data from all fields? [y/n] ", tty=False)
         if i == 'y':
             res = ThingSpeak.clear_data_from_all_fields(self.id, self.user_api_key)
-            if res.status_code == 200:
-                Utils.give_response(message=message, clear=True, status=True)
-                return 'reset'
-            else:
-                Utils.give_response(message=message, clear=True, status=False)
+            Utils.give_response(message=message, clear=True, status=res.status_code)
         else:
             return 'n'
 
+
     # Method to delet the channel
     def delete_channel(self):
-        message = f'Channel {self.channel_name} deleted'
+        message = f'Channel [{self.channel_name}] deleted'
         i = Utils.endless_terminal("Are you sure you want to delete the channel? [y/n] ",clear=True, tty=False)
         if i == "y":
-            req = ThingSpeak.remove_channel(self.id, self.user_api_key)
-            if req.status_code == 200:
-                Utils.give_response(message=message, clear=True, status=True)
-                return 'reset'
-            else:
-                Utils.give_response(message=message, clear=True, status=False)
+            res = ThingSpeak.remove_channel(self.id, self.user_api_key)
+            Utils.give_response(message=message, clear=True, status=res.status_code)

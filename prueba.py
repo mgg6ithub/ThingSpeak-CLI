@@ -55,30 +55,56 @@ from tabulate import tabulate
 
 # upload_csv(1)
 
-cadena = """
-╭───┬────────────┬──────────┬──────╮
-│ 1 │ 2023-12-01 │ 18:18:39 │  1.9 │
-├───┼────────────┼──────────┼──────┤
-│ 2 │ 2023-12-01 │ 18:18:55 │  6.6 │
-├───┼────────────┼──────────┼──────┤
-│ 3 │ 2023-12-01 │ 18:19:10 │ 13.1 │
-╰───┴────────────┴──────────┴──────╯
-"""
+# cadena = """
+# ╭───┬────────────┬──────────┬──────╮
+# │ 1 │ 2023-12-01 │ 18:18:39 │  1.9 │
+# ├───┼────────────┼──────────┼──────┤
+# │ 2 │ 2023-12-01 │ 18:18:55 │  6.6 │
+# ├───┼────────────┼──────────┼──────┤
+# │ 3 │ 2023-12-01 │ 18:19:10 │ 13.1 │
+# ╰───┴────────────┴──────────┴──────╯
+# """
 
 
-pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
+# pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
 
-coincidencias = re.findall(pattern, cadena)
+# coincidencias = re.findall(pattern, cadena)
 
-all_rows = []
-for index, date, time, value in coincidencias:
-    row = []
-    row.append(index)
-    row.append(date + 'T' + time)
-    row.append(value)
-    all_rows.append(row)
+# all_rows = []
+# for index, date, time, value in coincidencias:
+#     row = []
+#     row.append(index)
+#     row.append(date + 'T' + time)
+#     row.append(value)
+#     all_rows.append(row)
 
-new_string = tabulate(all_rows, tablefmt='rounded_grid')
+# new_string = tabulate(all_rows, tablefmt='rounded_grid')
 
-print(new_string)
+# print(new_string)
+
+
+
+# with open('todo.csv', 'r') as file:
+#     pattern = r"(\d+)[\s\,\|\-]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})[\s\,\|\-]+(\d+(\.\d+)?)"
     
+#     for row in file:
+#         match = re.match(pattern, row)
+#         print(match.groups.)
+    # for row in file.readlines():
+
+@staticmethod
+def print_help_template(help_dict):
+    help_str = ""
+    for entri in help_dict:
+        help_str += f"{entri:<20}{help_dict[entri]}\n"
+    return help_str
+
+help_dict = {
+    "rename": "Change the field name.",
+    "upload": "Upload data to the current field.",
+    "upload csv": "Upload the data of a csv file to the field.",
+    "download data": "Download the data from the current field to a file.(xlsx, txt, csv)"
+}
+        
+
+print(print_help_template(help_dict))

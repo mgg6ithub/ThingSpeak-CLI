@@ -8,21 +8,8 @@ from progress.bar import IncrementalBar
 from tqdm import tqdm
 import keyboard
 import csv
+import re
 
-# 'feeds': [{'created_at': '2023-11-08T22:48:56Z', 'entry_id': 1, 'field1': '0.1', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:12Z', 'entry_id': 2, 'field1': '0.4', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:27Z', 'entry_id': 3, 'field1': '0.4', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:43Z', 'entry_id': 4, 'field1': '0.3', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:49:59Z', 'entry_id': 5, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:50:14Z', 'entry_id': 6, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-08T22:50:30Z', 'entry_id': 7, 'field1': '0.2', 'field2': None}, 
-#            {'created_at': '2023-11-09T16:13:33Z', 'entry_id': 8, 'field1': None, 'field2': '0.1'}, 
-#            {'created_at': '2023-11-09T16:13:49Z', 'entry_id': 9, 'field1': None, 'field2': '0.3'}, 
-#            {'created_at': '2023-11-09T16:14:04Z', 'entry_id': 10, 'field1': None, 'field2': '0.2'}, 
-#            {'created_at': '2023-11-09T16:14:20Z', 'entry_id': 11, 'field1': None, 'field2': '0.3'}, 
-#            {'created_at': '2023-11-09T16:14:35Z', 'entry_id': 12, 'field1': None, 'field2': '0.4'}, 
-#            {'created_at': '2023-11-09T16:14:51Z', 'entry_id': 13, 'field1': None, 'field2': '0.2'}, 
-#            {'created_at': '2023-11-09T16:15:06Z', 'entry_id': 14, 'field1': None, 'field2': '0.2'}]}
 
 class Field:
 
@@ -43,6 +30,7 @@ class Field:
         res = ThingSpeak.get_feeds_from_field(self.channel_id, self.field_index, self.read_key)
         if res.status_code == 200:
             return res.json()['feeds']
+
 
     # Method to read data from a especific field
     def read_data_from_field(self):
@@ -85,63 +73,47 @@ class Field:
                 "field" + self.field_index: cpu
             })
 
-# # BUILT THE QUERY STRING
-        # query_string = '&'.join([f'field{self.field_index}={value}' for value in data_values])
-        # response = ThingSpeak.upload_data_from_csv_file(self.write_key, query_string)
-        # write_api_key=KKRLJNAXF86OLCPI&time_format=absolute&updates=2023-11-11 17:42:11,0.3,,,,,,,,|
-        # 2023-11-11 17:42:27,0.3,,,,,,,,|2023-11-11 17:42:42,0.3,,,,,,,,|
-        # 2023-11-11 17:42:58,0.3,,,,,,,,|2023-11-11 17:43:13,0.4,,,,,,,,|
-        # 2023-11-11 17:43:29,0.3,,,,,,,,|2023-11-11 17:43:45,0.4,,,,,,,,|
-        # 2023-11-11 17:44:00,0.3,,,,,,,,|2023-11-11 17:44:15,0.4,,,,,,,,|
-        # 2023-11-11 17:44:31,0.2,,,,,,,,
 
-    # Method to upload a csv data
     def upload_csv(self):
-        path_file = input('Enter the csv file path: ')
-
-        # check the date defualt no dateformat absolute
+        
+        message = 'Upload csv file'
+        path_file = str(input('Enter the csv file path: '))
 
         with open(path_file, 'r') as file:
-            # csv_reader = csv.reader(file, delimiter='\t')
-            # next(csv_reader)
-
-            # updates = ''
-            # for row in csv_reader:
-            #     timestamp = f'{row[0]} {row[1]}'
-            #     field2_value = row[2]
-            #     updates += f'{timestamp},{field2_value},,,,,,,,|'
             
-            striped_data = [word.strip().split('\t')[2] for word in file.readlines()]
+            pattern = r"(\d+)[\s\,\|\-]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})[\s\,\|\-]+(\d+(\.\d+)?)"
+
+            # striped_data = [word.strip().split('\t')[2] for word in file.readlines()]
 
             # Crear la cadena de actualización para ThingSpeak
             string_template = '0,,,,,,,,,,,,ok|'
 
             bulk_data = ""
-            for index, row_data in enumerate(striped_data):
-                lista = string_template.split(',')
-                lista[0] = str(index)
-                lista[int(self.field_index)] = row_data
-                temp_template = ','.join(lista)
+            for index, row_data in enumerate(file):
+                # print(row_data)
+                # input(re.match(pattern, row_data))
+                if re.match(pattern, row_data):
+                    lista = string_template.split(',')
+                    lista[0] = str(index)
+                    lista[int(self.field_index)] = row_data.split('\t')[2].strip()
+                    temp_template = ','.join(lista)
 
-                bulk_data += temp_template
-
-                if index == len(striped_data) - 1:
-                    if bulk_data.endswith('|'):
-                        bulk_data = bulk_data[:-1] # quitar el ultimo caracter que va a ser siempre un |
-                        break
+                    bulk_data += temp_template
 
             # Datos para enviar en la solicitud POST
             data_to_send = {
                 'write_api_key': self.write_key,
-                'time_format': 'relative',
-                'updates': bulk_data #.rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
+                'time_format': 'absolute',
+                'updates': bulk_data .rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
 
-            input(data_to_send)
-            # Convertir datos a formato adecuado para el cuerpo de la solicitud
-            # body_data = '&'.join([f'{key}={value}' for key, value in data_to_send.items()])
-            ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
-            return 'actualizar'
+            r = ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
+
+            if r.status_code == 202:
+                Utils.give_response(message=message, clear=True, status=202)
+                return 'actualizar'
+            else:
+                Utils.give_response(message=message, clear=True, status=201)
 
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos
@@ -204,7 +176,22 @@ class Field:
                     "3 -> txt\n"
         selected_option = Utils.endless_terminal(str_banner_choose_format, *list(format_options.keys()), clear=True)
 
-        format_options[selected_option](self.field_data_table, file_name, self.get_data_from_field(), self.field_index, date_format)
+        pattern = r"│\s*(\d+)\s*│\s*(\d{4}-\d{2}-\d{2})\s*│\s*(\d{2}:\d{2}:\d{2})\s*│\s*(\d+\.\d+)\s*│"
+        coincidencias = re.findall(pattern, self.field_data_table)
+
+        data = []
+        for index, date, time, value in coincidencias:
+            row = []
+            row.append(index)
+            if date_format == '1':
+                row.append(date + 'T' + time)
+            else:
+                row.append(date)
+                row.append(time)
+            row.append(value)
+            data.append(row)
+
+        format_options[selected_option](data, file_name, self.field_index, date_format)
 
 
     # Method to clear all the data of the field

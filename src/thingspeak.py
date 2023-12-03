@@ -140,16 +140,13 @@ class ThingSpeak:
                                                                                 'write_flag': False}]}
 
             r = Utils.make_request(method="POST", url="https://api.thingspeak.com/channels.json", json=body)
-
-            if r.status_code == 200:
-                Utils.give_response(message=f'New {public_flag} channel {name} created', clear=True, status=True)
-            else:
-                Utils.give_response(message=f'New {public_flag} channel {name} created', clear=True, status=False)
+            Utils.give_response(message=f'New channel [{name}] created', clear=True, status=r.status_code)
         else:
             Utils.clear()
             print('Make sure to enter [True/False] in the public flag field.')
             Utils.wait(3)
 
+    
     # Method to update information of the channel
     @staticmethod
     def update_channel_information(channel_id, updated_information):
