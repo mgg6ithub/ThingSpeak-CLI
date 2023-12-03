@@ -93,6 +93,7 @@ class Utils:
                 i = str(input(Fore.GREEN + f"[{menu}] ts> " + Fore.WHITE))
             else:
                 i = str(input(Fore.GREEN + "ts> " + Fore.WHITE))
+            # input(i)
             if i == 'clear' or i == 'cls':
                 Utils.clear()
             if i == 'help' and help_message:
@@ -111,7 +112,7 @@ class Utils:
 
     # Method to give the client a status response CORRECT|ERROR
     @staticmethod
-    def give_response(message=None, clear=False, status=True):
+    def give_response(message=None, clear=False, status=200):
         
         if clear:
             Utils.clear()
@@ -119,12 +120,11 @@ class Utils:
         if message:
             print(message, end='')
 
-        if status:
+        if status == 200 or status == 202:
             print(Fore.GREEN + " successfull." + Fore.WHITE)
-            Utils.wait(2)
-        else:
+        else:       
             print(Fore.RED + " error." + Fore.WHITE)
-            Utils.wait(2)
+        Utils.wait(2)
 
 
     # Method to make http requests
@@ -166,6 +166,18 @@ class Utils:
         ymd = date.split("T")[0]
         time = date.split("T")[1].split("Z")[0]
         return str(ymd) + " " + str(time)
+    
+
+    @staticmethod
+    def get_help_str_template(help_dict, banner=None):
+        if banner:
+            print(banner)
+        help_str = ""
+        for entri in help_dict:
+            # input(help_dict[entri][1])
+            help_str += f"{entri:<25}{help_dict[entri][1]}\n"
+        return help_str
+
 
     #
     # Methods to download data and create different file formats
@@ -180,9 +192,9 @@ class Utils:
 
             with open(save_path, "w", encoding="utf-8") as file:
                 file.write(field_data_table)
-            Utils.give_response(message="File created", status=True)  
+            Utils.give_response(message="File created", status=200)  
         except Exception as e:
-            Utils.give_response(message=f"File created {str(e)}", status=True)  
+            Utils.give_response(message=f"File created {str(e)}", status=201)  
 
 
     # Method to create a simple .csv file with the field data
@@ -197,9 +209,9 @@ class Utils:
                         file.write(f"{row[0]}\t{row[1]}\t{row[2]}{separator}")
                     else:
                         file.write(f"{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}{separator}")
-            Utils.give_response(message="File created", status=True)        
+            Utils.give_response(message="File created", status=200)        
         except Exception as e:
-            Utils.give_response(message=f"File created {str(e)}", status=False)
+            Utils.give_response(message=f"File created {str(e)}", status=201)
 
 
     # Method to create a row in a excel sheet with given data
@@ -234,9 +246,9 @@ class Utils:
                     else:
                         Utils.insert_row_in_sheet(ws, index + 1, [data_row[1], data_row[2], data_row[3]])
                 except Exception as e:
-                    Utils.give_response(message=f"Error inserting row {index + 1}: {str(e)}", status=False)
+                    Utils.give_response(message=f"Error inserting row {index + 1}: {str(e)}", status=201)
 
             wb.save(store_path)
-            Utils.give_response(message=f"File created at: {store_path}", status=True)
+            Utils.give_response(message=f"File created at: {store_path}", status=200)
         except Exception as e:
-            Utils.give_response(message=f"Error creating file: {str(e)}", status=False)
+            Utils.give_response(message=f"Error creating file: {str(e)}", status=201)

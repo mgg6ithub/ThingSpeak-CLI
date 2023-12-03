@@ -106,17 +106,14 @@ class Field:
                 'time_format': 'absolute',
                 'updates': bulk_data .rstrip('|')  # Eliminar el último carácter '|' para evitar problemas
             }
-            input(data_to_send)
 
             r = ThingSpeak.upload_data_from_csv_file(self.channel_id, data_to_send)
-            input(r.headers)
-            input(r.content)
+
             if r.status_code == 202:
-                Utils.give_response(message=message, clear=True, status=True)
-                Utils.wait(10)
+                Utils.give_response(message=message, clear=True, status=202)
                 return 'actualizar'
             else:
-                Utils.give_response(message=message, clear=True, status=False)
+                Utils.give_response(message=message, clear=True, status=201)
 
 
     # GRAFICO TIMIDO para que se vea algo al subir los datos

@@ -73,28 +73,21 @@ def field_menu(ts, channel, index, field_name):
     field = Field(index, field_name, channel.id, channel.write_api_key, channel.read_api_key)
     field.read_data_from_field()
 
-    str_field_menu_help = "rename\trename the field\n" \
-                        "upload\tupload data to the current field\n" \
-                        "upload csv\tupload the data of a csv file to the field\n" \
-                        "download data\tdownload data from the current field\n" \
-                        "clear field\tclear all the data from this field\n" \
-                        "delete field\tremove the field and all his data\n" \
-
     options_dict = {
-        "upload": field.subir_datos,
-        "upload csv": field.upload_csv,
-        "download data": field.download_data,
-        "clear field": field.clear_field_data, # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
-        "delete field": field.delete_field # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
+        "upload": [field.subir_datos, "Upload data to the current field."],
+        "upload csv": [field.upload_csv, "Upload the data of a csv file to the field."],
+        "download data": [field.download_data, "Download the data from the current field to a file.(xlsx, txt, csv)"]
+        # "clear field": field.clear_field_data, # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
+        # "delete field": field.delete_field # LA API DE THINGSPEAK NO PROPORCIONA UNA RUTA PARA ESTO
     }
     
     while True:
-        option = Utils.endless_terminal(field.field_data_table, *list(options_dict.keys()), help_message=str_field_menu_help, menu=channel.channel_name, menu1=field_name, clear=True)
+        option = Utils.endless_terminal(field.field_data_table, *list(options_dict.keys()), help_message=Utils.get_help_str_template(options_dict), menu=channel.channel_name, menu1=field_name, clear=True)
     
         if option == 'b':
             break
 
-        field_operation = options_dict[option]()
+        field_operation = options_dict[option][0]()
         if field_operation == 'actualizar':
             field.read_data_from_field()
 
@@ -102,19 +95,19 @@ def field_menu(ts, channel, index, field_name):
 def fields_selector(ts, channel):
     pattern = re.compile(r"^[1-8]$")
 
-    str_field_list_commands_help = "Select a field by entering his index.\n" \
-    "create field\tTo create a new field. Up to 8 fields in total.\n" \
-    "rename field\tRename a field and give it a new name.\n" \
-    "clear fields\tClear all the data from all the fields.\n" \
-    "delete field\tDelete a existing field.\n" \
-    "delete all fields\tDelete all existing field and their data.\n"
+    # str_field_list_commands_help = "Select a field by entering his index.\n" \
+    # "create field\tTo create a new field. Up to 8 fields in total.\n" \
+    # "rename field\tRename a field and give it a new name.\n" \
+    # "clear fields\tClear all the data from all the fields.\n" \
+    # "delete field\tDelete a existing field.\n" \
+    # "delete all fields\tDelete all existing field and their data.\n"
 
     options_dict = {
-        "create field": channel.create_one_field, # OK
-        "rename field": channel.rename_field_name, # OK
-        "clear fields": channel.clear_data_from_all_fields, # OK
-        "delete field": channel.delete_one_field, # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
-        "delete all fields": channel.delete_all_fields # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
+        "create field": [channel.create_one_field, "Create a new field, up to 8 maximum."], # OK
+        "rename field": [channel.rename_field_name, "Rename a field and give it a new name."], # OK
+        "clear fields": [channel.clear_data_from_all_fields, "Clear all the data from all the fields."] # OK
+        # "delete field": [channel.delete_one_field, # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
+        # "delete all fields": channel.delete_all_fields # LA API DE THINGSPEAK NO PROPORCIONA UNA FORMA DE BORRA UN SOLO CANAL
     }
     
     while True:
@@ -128,7 +121,7 @@ def fields_selector(ts, channel):
 
         valid_options = list(options_dict.keys()) + channel.valid_field_indexes
 
-        field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=str_field_list_commands_help, menu=channel.channel_name)
+        field_menu_option = Utils.endless_terminal(channel.table_of_fields, *valid_options, help_message=Utils.get_help_str_template(options_dict, banner="Select a field by entering his index."), menu=channel.channel_name)
 
         if field_menu_option == 'b':
             break
@@ -136,12 +129,9 @@ def fields_selector(ts, channel):
         # field has been selected
         if pattern.match(field_menu_option):
             field_menu(ts, channel, field_menu_option, channel.get_field_name(int(field_menu_option)))
+            continue
         
         options_dict[field_menu_option]()
-
-        # # option in field list has been selected (help, create field, delete field, ...)
-        # if field_menu_option in options_dict:
-        #     options_dict[field_menu_option]()
 
 
 # Method to control the flow of a selected channel
@@ -175,17 +165,17 @@ def channel_menu(ts, user_api_key, i, indexes, channel_name):
 
             while True:
 
-                str_help_channel_info = "more info\tKeys of the channel.\n" \
-                                        "update info\tUpdate a the channel information. Name, tags, etc..."
+                # str_help_channel_info = "more info\tKeys of the channel.\n" \
+                #                         "update info\tUpdate a the channel information. Name, tags, etc..."
                 
                 update_menu_options_dict = {
-                    "more info": channel.display_more_channel_info,
-                    "update info": channel.update_channels_information
+                    "more info": [channel.display_more_channel_info, "Keys of the channel"],
+                    "update info": [channel.update_channels_information, "Update a the channel information. Name, tags, etc..."]
                 }
 
                 update_option = Utils.endless_terminal(channel.generate_channel_information_table() + '\n' + more_info_table, 
                                                        *list(update_menu_options_dict.keys()),
-                                                        help_message=str_help_channel_info, 
+                                                        help_message=Utils.get_help_str_template(update_menu_options_dict), 
                                                         menu=channel.channel_name, clear=True)
 
                 if update_option == 'b':

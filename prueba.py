@@ -91,4 +91,20 @@ from tabulate import tabulate
 #         match = re.match(pattern, row)
 #         print(match.groups.)
     # for row in file.readlines():
+
+@staticmethod
+def print_help_template(help_dict):
+    help_str = ""
+    for entri in help_dict:
+        help_str += f"{entri:<20}{help_dict[entri]}\n"
+    return help_str
+
+help_dict = {
+    "rename": "Change the field name.",
+    "upload": "Upload data to the current field.",
+    "upload csv": "Upload the data of a csv file to the field.",
+    "download data": "Download the data from the current field to a file.(xlsx, txt, csv)"
+}
         
+
+print(print_help_template(help_dict))
