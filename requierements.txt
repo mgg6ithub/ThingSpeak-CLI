@@ -1,0 +1,6 @@
+requests
+psutil
+tabulate
+colorama
+openpyxl
+pandas

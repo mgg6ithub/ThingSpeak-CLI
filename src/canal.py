@@ -293,26 +293,6 @@ class Channel:
         pass
 
 
-    # # Method to create fields from a channel
-    # def create_fields_in_channel(self):
-    #     message = 'New field'
-    #     cont = 1
-    #     i = None
-    #     new_fields = {"api_key": self.user_api_key}
-
-    #     while i is not "n" and cont <= 8:
-    #         print("Enter the name for the field: ")
-    #         new_fields["field" + str(cont)] = input("[" + str(cont) + "º campo]=")
-    #         cont += 1
-    #         print("Do you wan to create another field? [y/n]\n")
-    #         i = input("->")
-
-    #     req = Utils.make_request(method="put", url=f"https://api.thingspeak.com/channels/{self.id}.json",
-    #                             json=new_fields)
-    #     if req.status_code == 200:
-    #         Utils.give_response(meesage="")
-
-
     # Method to remove all the fields from a channel
     def delete_all_fields(self):
 
