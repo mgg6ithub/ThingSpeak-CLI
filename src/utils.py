@@ -1,4 +1,3 @@
-
 import os
 import requests
 from requests.exceptions import InvalidSchema, InvalidURL
@@ -98,7 +97,8 @@ class Utils:
             if i == 'help' and help_message:
                 print("\n" + help_message)
             if only_string:
-                return i
+                if ':' in i:
+                    return i
             if i in options or i.__eq__("b") or exit:
                 return i                
 

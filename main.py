@@ -8,6 +8,15 @@ import signal
 import sys
 import re
 
+title = """
+  ..... ..     ....              ...                     .                        .... .      ....  
+    :   .. .    ..   ...   .... .:.    ....  ....  ...   :  ..                   :.    ..      :.   
+    :   .. ..   ..  .: .: .. .:  ....  .  .. ^.... ...:  :..:        ....        ::    :.      :    
+    .   .. .:  ..:. .. .: .:..:  . .: .:..:. :... .:..:. :...                    :.... :....  .:..   
+                           ....       .:                                                            
+                           ...
+                                     by M11K33L         
+"""
 
 # u = Utils()
 init()
@@ -47,26 +56,19 @@ def checkUserApyKey(user_api_key):
 
 # Method to login
 def login():
-
-    str_banner = "1. login in with ThingSpeak web page CREDENTIALS.\n\n" \
-                    "2. login with APY KEY.\n\n" \
-                    "CTRL + C to exit the program at any time.\n"
     
+    str_banner = "Enter your api key: "
+
     while True:
-        Utils.clear()
-        option = Utils.endless_terminal(str_banner, "1", "2")
-        Utils.clear()
+        user_api_key = Utils.endless_terminal(title + '\n\n\n' + str_banner, tty=False, clear=True)
 
-        if option == "2":
-            user_api_key = input("Enter your api key: ")
-
-            if checkUserApyKey(user_api_key):
-                print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
-                Utils.wait_animation(1)
-                main_menu(user_api_key)
-            else:
-                print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
-                Utils.wait_animation(1)
+        if checkUserApyKey(user_api_key):
+            print(Fore.GREEN + "Successfull " + Fore.WHITE + "APY KEY provided.")
+            Utils.wait_animation(1)
+            main_menu(user_api_key)
+        else:
+            print(Fore.RED + "Wrong " + Fore.WHITE + "APY KEY provided.")
+            Utils.wait_animation(1)
 
 
 # Method to control de flow of a selected field
@@ -213,7 +215,7 @@ def main_menu(user_api_key):
             option = Utils.endless_terminal(str_banner, "1", "2", "3", "4", clear="yes")
 
             if option.__eq__("b"):
-                signal_handler()
+                break
 
             if option == "1":
                 indexes = ts.print_channel_index(ts.public_channels)
@@ -240,7 +242,5 @@ def main_menu(user_api_key):
                 ts.get_account_info()
 
 
-"0WX1WIYR7G3QMKUR"
 if __name__ == '__main__':
-    # login()
-    main_menu('0WX1WIYR7G3QMKUR')
+    login()
